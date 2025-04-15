@@ -29,6 +29,8 @@ from flask_cors import CORS
 import faiss
 from flask import Flask, request
 from sentence_transformers import SentenceTransformer
+
+
 courses_df = pd.read_csv("output_data/output_course_data.csv")
 json_string = courses_df.to_json(orient='records')
 # data = json.loads(courses_df)
@@ -218,3 +220,5 @@ def get_data():
 # Running app
 if __name__ == '__main__':
     app.run(debug=True)
+    # port = int(os.environ.get("PORT", 10000))
+    # app.run(host='0.0.0.0', port=port)
