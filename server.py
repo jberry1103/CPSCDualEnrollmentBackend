@@ -211,7 +211,6 @@ def get_time():
     
 @app.route('/table')
 def get_data():
-#    return data
     return json_string
     
     
