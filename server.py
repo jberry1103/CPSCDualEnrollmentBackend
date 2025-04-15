@@ -29,7 +29,7 @@ from flask_cors import CORS
 import faiss
 from flask import Flask, request
 from sentence_transformers import SentenceTransformer
-import os
+
 
 courses_df = pd.read_csv("output_data/output_course_data.csv")
 json_string = courses_df.to_json(orient='records')
