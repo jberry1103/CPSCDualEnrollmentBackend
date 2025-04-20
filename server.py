@@ -31,8 +31,8 @@ import numpy as np
 
 
 # # Initializing flask app
-# app = Flask(__name__)
-# CORS(app, resources={r"/*": {"origins": "*"}})
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 # # Route for seeing a data
