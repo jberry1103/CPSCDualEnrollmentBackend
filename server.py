@@ -119,8 +119,8 @@ def home():
 # Running app
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=10000)
-    port = int(os.environ.get('PORT', 5000))  # Use the PORT env variable or default to 5000
-    app.run(host='0.0.0.0', port=port)
+    # port = int(os.environ.get('PORT', 5000))  # Use the PORT env variable or default to 5000
+    app.run(host='0.0.0.0', port=5000)
     
 
     
