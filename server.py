@@ -1,11 +1,11 @@
 import os
-from flask import Flask
-import pandas as pd
+# from flask import Flask
+# import pandas as pd
 from flask_cors import CORS
-import faiss
+# import faiss
 from flask import Flask, request
-from sentence_transformers import SentenceTransformer
-import numpy as np
+# from sentence_transformers import SentenceTransformer
+# import numpy as np
 
 # courses_df = pd.read_csv("output_data/output_course_data.csv")
 # json_string = courses_df.to_json(orient='records')
