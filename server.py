@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 import datetime
 import pandas as pd
@@ -121,7 +122,8 @@ def get_search():
 # Running app
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=10000)
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))  # Use the PORT env variable or default to 5000
+    app.run(host='0.0.0.0', port=port)
     
 
     
