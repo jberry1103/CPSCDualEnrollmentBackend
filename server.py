@@ -1,33 +1,33 @@
 import os
-# from flask import Flask
-# import pandas as pd
+from flask import Flask
+import pandas as pd
 from flask_cors import CORS
-# import faiss
+import faiss
 from flask import Flask, request
-# from sentence_transformers import SentenceTransformer
-# import numpy as np
+from sentence_transformers import SentenceTransformer
+import numpy as np
 
-# courses_df = pd.read_csv("output_data/output_course_data.csv")
-# json_string = courses_df.to_json(orient='records')
-# # data = json.loads(courses_df)
-# print(json_string)
-# data_list = []
-
-
-# # Load a pretrained Sentence Transformer model
-# model = SentenceTransformer("all-MiniLM-L6-v2")
-# filename = "output.txt"
-# f = open(filename, "a")
+courses_df = pd.read_csv("output_data/output_course_data.csv")
+json_string = courses_df.to_json(orient='records')
+# data = json.loads(courses_df)
+print(json_string)
+data_list = []
 
 
-# # Process data
-# course_embeddings = model.encode(courses_df["HS Course Description"].tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
-# d = course_embeddings.shape[1]
+# Load a pretrained Sentence Transformer model
+model = SentenceTransformer("all-MiniLM-L6-v2")
+filename = "output.txt"
+f = open(filename, "a")
 
 
-# # Create FAISS similarity search
-# index = faiss.IndexFlatL2(d)  # L2 distance index (Euclidean)
-# index.add(course_embeddings)  # Add all course vectors to the index
+# Process data
+course_embeddings = model.encode(courses_df["HS Course Description"].tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
+d = course_embeddings.shape[1]
+
+
+# Create FAISS similarity search
+index = faiss.IndexFlatL2(d)  # L2 distance index (Euclidean)
+index.add(course_embeddings)  # Add all course vectors to the index
 
 
 # # Initializing flask app
@@ -35,83 +35,83 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
-# # Route for seeing a data
-# @app.route('/data', methods=['POST'])
-# def get_time():
-#     data = request.get_json()
-#     input_course_name = data['name']
-#     input_course_description = data["description"]
-#     filename = "output.txt"
-#     f = open(filename, "a")
-#     # Convert input course to an embedding
-#     input_embedding = model.encode([input_course_description], convert_to_numpy=True).astype('float32')
+# Route for seeing a data
+@app.route('/data', methods=['POST'])
+def get_time():
+    data = request.get_json()
+    input_course_name = data['name']
+    input_course_description = data["description"]
+    filename = "output.txt"
+    f = open(filename, "a")
+    # Convert input course to an embedding
+    input_embedding = model.encode([input_course_description], convert_to_numpy=True).astype('float32')
 
-#     #  Search for the most similar courses
-#     distances, indices = index.search(input_embedding, k=10)  
-#     # Get the top matching courses
-#     similar_courses = courses_df.iloc[indices[0]].copy()
-#     similar_courses["Similarity_Score"] = 1 / (1 + distances[0])  # Convert distance to similarity score (higher is better)
-#     similar_course_names = similar_courses["College Course Name"]
-#     similar_course_descriptions = similar_courses["College Course Description"]
-#     similar_course_colleges = similar_courses["College"]
-#     similar_course_numbers = similar_courses["College Course"]
+    #  Search for the most similar courses
+    distances, indices = index.search(input_embedding, k=10)  
+    # Get the top matching courses
+    similar_courses = courses_df.iloc[indices[0]].copy()
+    similar_courses["Similarity_Score"] = 1 / (1 + distances[0])  # Convert distance to similarity score (higher is better)
+    similar_course_names = similar_courses["College Course Name"]
+    similar_course_descriptions = similar_courses["College Course Description"]
+    similar_course_colleges = similar_courses["College"]
+    similar_course_numbers = similar_courses["College Course"]
         
    
-#     return {
-#       'name1': similar_course_names.iloc[0],
-#       'description1': similar_course_descriptions.iloc[0],
-#       'college_course1': similar_course_colleges.iloc[0],
-#       'course_number1': similar_course_numbers.iloc[0],
-#       'name2': similar_course_names.iloc[1],
-#       'description2': similar_course_descriptions.iloc[1],
-#       'college_course2': similar_course_colleges.iloc[1],
-#        'course_number2': similar_course_numbers.iloc[1],
-#       'name3':similar_course_names.iloc[2],
-#       'description3': similar_course_descriptions.iloc[2],
-#       'college_course3': similar_course_colleges.iloc[2],
-#        'course_number3': similar_course_numbers.iloc[2],
-#         }
+    return {
+      'name1': similar_course_names.iloc[0],
+      'description1': similar_course_descriptions.iloc[0],
+      'college_course1': similar_course_colleges.iloc[0],
+      'course_number1': similar_course_numbers.iloc[0],
+      'name2': similar_course_names.iloc[1],
+      'description2': similar_course_descriptions.iloc[1],
+      'college_course2': similar_course_colleges.iloc[1],
+       'course_number2': similar_course_numbers.iloc[1],
+      'name3':similar_course_names.iloc[2],
+      'description3': similar_course_descriptions.iloc[2],
+      'college_course3': similar_course_colleges.iloc[2],
+       'course_number3': similar_course_numbers.iloc[2],
+        }
     
-# @app.route('/table')
-# def get_data():
-# #    return data
-#     return json_string
+@app.route('/table')
+def get_data():
+#    return data
+    return json_string
     
-# @app.route('/search', methods=['POST'])
-# def get_search():
-#     search_input = request.get_json()
-#     column_indices = {}
-#     column_vectors = {}
-#     column_texts = {}
+@app.route('/search', methods=['POST'])
+def get_search():
+    search_input = request.get_json()
+    column_indices = {}
+    column_vectors = {}
+    column_texts = {}
 
-#     for col in courses_df.columns:
-#         texts = courses_df[col].astype(str).tolist()
-#         embeddings = model.encode(texts, convert_to_numpy=True)
+    for col in courses_df.columns:
+        texts = courses_df[col].astype(str).tolist()
+        embeddings = model.encode(texts, convert_to_numpy=True)
         
-#         index = faiss.IndexFlatL2(embeddings.shape[1])
-#         index.add(embeddings)
+        index = faiss.IndexFlatL2(embeddings.shape[1])
+        index.add(embeddings)
 
-#         column_indices[col] = index
-#         column_vectors[col] = embeddings
-#         column_texts[col] = texts
+        column_indices[col] = index
+        column_vectors[col] = embeddings
+        column_texts[col] = texts
     
-#     input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
+    input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
 
-#     # Compare input to each column's FAISS index to find best match
-#     column_similarities = {}
+    # Compare input to each column's FAISS index to find best match
+    column_similarities = {}
 
-#     for col, index in column_indices.items():
-#         D, I = index.search(np.array([input_embedding]), k=1)  # Top 1 match
-#         column_similarities[col] = D[0][0]  # Smaller distance = more similar
+    for col, index in column_indices.items():
+        D, I = index.search(np.array([input_embedding]), k=1)  # Top 1 match
+        column_similarities[col] = D[0][0]  # Smaller distance = more similar
 
-#     # Get the best matching column
-#     best_column = min(column_similarities, key=column_similarities.get)
-#     index = column_indices[best_column]
-#     D, I = index.search(np.array([input_embedding]), k=20)
+    # Get the best matching column
+    best_column = min(column_similarities, key=column_similarities.get)
+    index = column_indices[best_column]
+    D, I = index.search(np.array([input_embedding]), k=20)
 
-#     top_rows = courses_df.iloc[I[0]]
-#     json_string = top_rows.to_json(orient='records')
-#     return json_string
+    top_rows = courses_df.iloc[I[0]]
+    json_string = top_rows.to_json(orient='records')
+    return json_string
 
 @app.route('/')
 def home():
