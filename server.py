@@ -1,6 +1,5 @@
 import os
 from flask import Flask
-import datetime
 import pandas as pd
 from flask_cors import CORS
 import faiss
@@ -30,11 +29,6 @@ d = course_embeddings.shape[1]
 index = faiss.IndexFlatL2(d)  # L2 distance index (Euclidean)
 index.add(course_embeddings)  # Add all course vectors to the index
 
-
-
-# 1. Load a pretrained Sentence Transformer model
-model = SentenceTransformer("all-MiniLM-L6-v2")
-# x = datetime.datetime.now()
 
 # Initializing flask app
 app = Flask(__name__)
@@ -119,6 +113,9 @@ def get_search():
     json_string = top_rows.to_json(orient='records')
     return json_string
 
+@app.route('/')
+def home():
+    return "Flask app is running!"
 # Running app
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=10000)
