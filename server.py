@@ -9,7 +9,7 @@ import numpy as np
 
 courses_df = pd.read_csv("output_data/output_course_data.csv")
 json_string = courses_df.to_json(orient='records')
-# data = json.loads(courses_df)
+#data = json.loads(courses_df)
 print(json_string)
 data_list = []
 
