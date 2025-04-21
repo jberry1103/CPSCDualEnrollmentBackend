@@ -8,9 +8,11 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 
 courses_df = pd.read_csv("output_data/output_course_data.csv")
+
 json_string = courses_df.to_json(orient='records')
-#data = json.loads(courses_df)
-print(json_string)
+df = courses_df[['College', 'College Program', 'Career Cluster', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
+print(df)
+student_string = df.to_json(orient='records')
 data_list = []
 
 
@@ -116,6 +118,11 @@ def get_search():
 @app.route('/')
 def home():
     return "Flask app is running!"
+
+@app.route('/student')
+def student_view():
+    return student_string
+
 # Running app
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=10000)
