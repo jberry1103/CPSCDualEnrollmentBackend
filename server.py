@@ -116,7 +116,7 @@ def get_search():
     json_string = df.to_json(orient='records')
     return json_string
 @app.route('/studentSearch', methods=['POST'])
-def get_search():
+def get_student_search():
     search_input = request.get_json()
     column_indices = {}
     column_vectors = {}
