@@ -39,21 +39,14 @@ for col in courses_df.columns:
         texts = courses_df[col].astype(str).tolist()
         embeddings = model.encode(texts, convert_to_numpy=True)
         
-        searchIndex = faiss.IndexFlatL2(embeddings.shape[1])
-        searchIndex.add(embeddings)
+        search_index = faiss.IndexFlatL2(embeddings.shape[1])
+        search_index.add(embeddings)
 
         column_indices[col] = index
         column_vectors[col] = embeddings
         column_texts[col] = texts
     
-input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
 
-# Compare input to each column's FAISS index to find best match
-column_similarities = {}
-
-for col, index in column_indices.items():
-        D, I = index.search(np.array([input_embedding]), k=1)  # Top 1 match
-        column_similarities[col] = D[0][0]  # Smaller distance = more similar
 
 # # Initializing flask app
 app = Flask(__name__)
@@ -166,6 +159,14 @@ def get_student_search():
     #     column_similarities[col] = D[0][0]  # Smaller distance = more similar
 
     # Get the best matching column
+    input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
+
+    # Compare input to each column's FAISS index to find best match
+    column_similarities = {}
+
+    for col, index in column_indices.items():
+        D, I = search_index.search(np.array([input_embedding]), k=1)  # Top 1 match
+        column_similarities[col] = D[0][0]  # Smaller distance = more similar
     input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
     best_column = min(column_similarities, key=column_similarities.get)
     index = column_indices[best_column]
