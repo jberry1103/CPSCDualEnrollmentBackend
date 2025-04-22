@@ -31,20 +31,7 @@ d = course_embeddings.shape[1]
 index = faiss.IndexFlatL2(d)  # L2 distance index (Euclidean)
 index.add(course_embeddings)  # Add all course vectors to the index
 
-column_indices = {}
-column_vectors = {}
-column_texts = {}
 
-for col in courses_df.columns:
-        texts = courses_df[col].astype(str).tolist()
-        embeddings = model.encode(texts, convert_to_numpy=True)
-        
-        search_index = faiss.IndexFlatL2(embeddings.shape[1])
-        search_index.add(embeddings)
-
-        column_indices[col] = index
-        column_vectors[col] = embeddings
-        column_texts[col] = texts
     
 
 
@@ -134,29 +121,29 @@ def get_search():
 @app.route('/studentSearch', methods=['POST'])
 def get_student_search():
     search_input = request.get_json()
-    # column_indices = {}
-    # column_vectors = {}
-    # column_texts = {}
+    column_indices = {}
+    column_vectors = {}
+    column_texts = {}
 
-    # for col in courses_df.columns:
-    #     texts = courses_df[col].astype(str).tolist()
-    #     embeddings = model.encode(texts, convert_to_numpy=True)
+    for col in courses_df.columns:
+        texts = courses_df[col].astype(str).tolist()
+        embeddings = model.encode(texts, convert_to_numpy=True)
         
-    #     index = faiss.IndexFlatL2(embeddings.shape[1])
-    #     index.add(embeddings)
+        index = faiss.IndexFlatL2(embeddings.shape[1])
+        index.add(embeddings)
 
-    #     column_indices[col] = index
-    #     column_vectors[col] = embeddings
-    #     column_texts[col] = texts
+        column_indices[col] = index
+        column_vectors[col] = embeddings
+        column_texts[col] = texts
     
-    # input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
+    input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
 
-    # # Compare input to each column's FAISS index to find best match
-    # column_similarities = {}
+    # Compare input to each column's FAISS index to find best match
+    column_similarities = {}
 
-    # for col, index in column_indices.items():
-    #     D, I = index.search(np.array([input_embedding]), k=1)  # Top 1 match
-    #     column_similarities[col] = D[0][0]  # Smaller distance = more similar
+    for col, index in column_indices.items():
+        D, I = index.search(np.array([input_embedding]), k=1)  # Top 1 match
+        column_similarities[col] = D[0][0]  # Smaller distance = more similar
 
     # Get the best matching column
     input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
