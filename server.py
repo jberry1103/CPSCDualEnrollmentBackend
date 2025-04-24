@@ -116,7 +116,7 @@ def get_search():
 
     top_rows = courses_df.iloc[I[0]]
     df = top_rows[['College', 'College Program', 'College Course', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
-    json_string = df.to_json(orient='records')
+    json_string = top_rows.to_json(orient='records')
     return json_string
 @app.route('/studentSearch', methods=['POST'])
 def get_student_search():
@@ -146,22 +146,13 @@ def get_student_search():
         column_similarities[col] = D[0][0]  # Smaller distance = more similar
 
     # Get the best matching column
-    input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
-
-    # Compare input to each column's FAISS index to find best match
-    column_similarities = {}
-
-    for col, index in column_indices.items():
-        D, I = search_index.search(np.array([input_embedding]), k=1)  # Top 1 match
-        column_similarities[col] = D[0][0]  # Smaller distance = more similar
-    input_embedding = model.encode([search_input], convert_to_numpy=True)[0]
     best_column = min(column_similarities, key=column_similarities.get)
     index = column_indices[best_column]
     D, I = index.search(np.array([input_embedding]), k=20)
 
     top_rows = courses_df.iloc[I[0]]
-
-    json_string = top_rows.to_json(orient='records')
+    df = top_rows[['College', 'College Program', 'College Course', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
+    json_string = df.to_json(orient='records')
     return json_string
 @app.route('/')
 def home():
