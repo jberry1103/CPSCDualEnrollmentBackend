@@ -190,10 +190,26 @@ def get_student_search():
 
 
     top_rows = courses_df.iloc[indices[0]]
-    top_rows = courses_df.iloc[indices[0]]
     df = top_rows[['College', 'College Program', 'College Course', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
     json_string = df.to_json(orient='records')
     return json_string
+
+@app.route('/filter', methods=['POST'])
+def get_student_search():
+    data = request.get_json()
+    high_school_input = data['filter1']
+    college_input = data['filter1']
+    current_subset_df = courses_df
+    if (college_input == ""): 
+        current_subset_df = courses_df[courses_df['High School'] == high_school_input]
+    elif (high_school_input == ""):
+        current_subset_df = courses_df[courses_df['College'] == high_school_input]
+    else: 
+        current_subset_df = courses_df[courses_df['High School'] == high_school_input]
+        current_subset_df = current_subset_df[courses_df['College'] == high_school_input]
+    json_string = current_subset_df.to_json(orient='records')
+    return json_string
+
 @app.route('/')
 def home():
     return "Flask app is running!"
