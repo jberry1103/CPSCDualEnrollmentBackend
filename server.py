@@ -91,11 +91,6 @@ def get_search():
 
     index = faiss.IndexFlatL2(embeddings.shape[1])
     index.add(embeddings)
-    texts = courses_df.iloc[0].astype(str).tolist()
-    embeddings = model.encode(texts, convert_to_numpy=True)
-
-    index = faiss.IndexFlatL2(embeddings.shape[1])
-    index.add(embeddings)
 
     # convert input to embedding
 
@@ -114,25 +109,6 @@ def get_search():
     index = faiss.IndexFlatL2(d)
     index.add(course_embeddings)
     distances, indices = index.search(input_embedding, k=25)
-
-    # convert input to embedding
-
-    input_embedding = model.encode([search_input], convert_to_numpy=True).astype('float32')
-
-    #search for most similar attribute
-    distances, indices = index.search(input_embedding, k=1)
-    similar_attributes = courses_df.columns.to_list()
-    att_index = int(indices[0][0])
-    best_column = similar_attributes[att_index]
-
-    # Process data
-    course_embeddings = model.encode(courses_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
-    d = course_embeddings.shape[1]
-
-    index = faiss.IndexFlatL2(d)
-    index.add(course_embeddings)
-    distances, indices = index.search(input_embedding, k=25)
-
 
     top_rows = courses_df.iloc[indices[0]]
     json_string = top_rows.to_json(orient='records')
@@ -146,29 +122,6 @@ def get_student_search():
 
     index = faiss.IndexFlatL2(embeddings.shape[1])
     index.add(embeddings)
-    texts = courses_df.iloc[0].astype(str).tolist()
-    embeddings = model.encode(texts, convert_to_numpy=True)
-
-    index = faiss.IndexFlatL2(embeddings.shape[1])
-    index.add(embeddings)
-
-    # convert input to embedding
-
-    input_embedding = model.encode([search_input], convert_to_numpy=True).astype('float32')
-
-    #search for most similar attribute
-    distances, indices = index.search(input_embedding, k=1)
-    similar_attributes = courses_df.columns.to_list()
-    att_index = int(indices[0][0])
-    best_column = similar_attributes[att_index]
-
-    # Process data
-    course_embeddings = model.encode(courses_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
-    d = course_embeddings.shape[1]
-
-    index = faiss.IndexFlatL2(d)
-    index.add(course_embeddings)
-    distances, indices = index.search(input_embedding, k=25)
 
     # convert input to embedding
 
