@@ -143,7 +143,7 @@ def get_student_search():
 
 
     top_rows = courses_df.iloc[indices[0]]
-    df = top_rows[['College', 'College Program', 'College Course', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years', 'High School']]
+    df = top_rows[['College', 'College Program', 'College Course', 'High School', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
     json_string = df.to_json(orient='records')
     return json_string
 
