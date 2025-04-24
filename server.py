@@ -195,7 +195,7 @@ def get_student_search():
     return json_string
 
 @app.route('/filter', methods=['POST'])
-def get_student_search():
+def get_filter():
     data = request.get_json()
     high_school_input = data['filter1']
     college_input = data['filter1']
