@@ -207,8 +207,7 @@ def get_filter():
     else: 
         current_subset_df = courses_df[courses_df['High School'] == high_school_input]
         current_subset_df = current_subset_df[courses_df['College'] == high_school_input]
-    json_string = current_subset_df.to_json(orient='records')
-    print(json_string)
+    json_string = courses_df.to_json(orient='records')
     return json_string
 
 @app.route('/')
