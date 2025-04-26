@@ -152,6 +152,7 @@ def get_filter():
     data = request.get_json()
     high_school_input = data['filter1']
     college_input = data['filter2']
+   
     current_subset_df = courses_df
     if (college_input == ""): 
         current_subset_df = courses_df[courses_df['High School'] == high_school_input]
@@ -160,7 +161,8 @@ def get_filter():
     else: 
         current_subset_df = courses_df[courses_df['High School'] == high_school_input]
         current_subset_df = current_subset_df[current_subset_df ['College'] == college_input]
-    json_string = current_subset_df.to_json(orient='records')
+    print(current_subset_df)
+    json_string = courses_df.to_json(orient='records')
     return json_string
 
 @app.route('/')
