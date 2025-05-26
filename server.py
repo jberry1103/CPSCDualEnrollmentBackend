@@ -10,7 +10,7 @@ import numpy as np
 courses_df = pd.read_csv("output_data/output_course_data.csv")
 
 json_string = courses_df.to_json(orient='records')
-df = courses_df[['College', 'College Program', 'College Course', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
+df = courses_df[['College', 'College Program', 'College Course', 'College Course Name', 'High School', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
 
 student_string = df.to_json(orient='records')
 data_list = []
