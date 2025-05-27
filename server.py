@@ -150,20 +150,21 @@ def get_student_search():
 @app.route('/filter', methods=['POST'])
 def get_filter():
     data = request.get_json()
-    high_school_input = data['filter1']
-    college_input = data['filter2']
+    return data
+    # high_school_input = data['filter1']
+    # college_input = data['filter2']
    
-    current_subset_df = courses_df
-    if (college_input == ""): 
-        current_subset_df = courses_df[courses_df['High School'] == high_school_input]
-    elif (high_school_input == ""):
-        current_subset_df = courses_df[courses_df['College'] == high_school_input]
-    else: 
-        current_subset_df = courses_df[courses_df['High School'] == high_school_input]
-        current_subset_df = current_subset_df[current_subset_df ['College'] == college_input]
-    print(current_subset_df)
-    json_string = courses_df.to_json(orient='records')
-    return json_string
+    # current_subset_df = courses_df
+    # if (college_input == ""): 
+    #     current_subset_df = courses_df[courses_df['High School'] == high_school_input]
+    # elif (high_school_input == ""):
+    #     current_subset_df = courses_df[courses_df['College'] == high_school_input]
+    # else: 
+    #     current_subset_df = courses_df[courses_df['High School'] == high_school_input]
+    #     current_subset_df = current_subset_df[current_subset_df ['College'] == college_input]
+    # print(current_subset_df)
+    # json_string = courses_df.to_json(orient='records')
+    # return json_string
 
 @app.route('/')
 def home():
