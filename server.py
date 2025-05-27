@@ -149,22 +149,24 @@ def get_student_search():
 
 @app.route('/filter', methods=['POST'])
 def get_filter():
-    data = request.get_json()
-    return data
-    # high_school_input = data['filter1']
-    # college_input = data['filter2']
-   
-    # current_subset_df = courses_df
-    # if (college_input == ""): 
-    #     current_subset_df = courses_df[courses_df['High School'] == high_school_input]
-    # elif (high_school_input == ""):
-    #     current_subset_df = courses_df[courses_df['College'] == high_school_input]
-    # else: 
-    #     current_subset_df = courses_df[courses_df['High School'] == high_school_input]
-    #     current_subset_df = current_subset_df[current_subset_df ['College'] == college_input]
-    # print(current_subset_df)
-    # json_string = courses_df.to_json(orient='records')
-    # return json_string
+    filters = request.get_json()
+    highschool_filter = filters.get("highschool", "").strip()
+    college_filter = filters.get("college", "").strip()
+
+    # Start with the full DataFrame
+    current_subset_df = courses_df
+
+    # Apply filters conditionally
+    if highschool_filter:
+        current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
+    
+    if college_filter:
+        current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+
+    # Convert the filtered DataFrame to JSON
+    json_result = current_subset_df.to_json(orient='records')
+
+    return json_result
 
 @app.route('/')
 def home():
