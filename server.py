@@ -155,10 +155,11 @@ def get_filter():
 
     # Start with the full DataFrame
     current_subset_df = courses_df
-
+    print(highschool_filter)
     # Apply filters conditionally
     if highschool_filter:
         current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
+    
     
     if college_filter:
         current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
