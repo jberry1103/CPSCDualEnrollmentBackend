@@ -87,7 +87,7 @@ def get_data():
 def get_search():
     search_input = request.get_json()
 
-    texts = courses_df.iloc[0].astype(str).tolist()
+    texts = current_subset_df.iloc[0].astype(str).tolist()
     embeddings = model.encode(texts, convert_to_numpy=True)
 
     index = faiss.IndexFlatL2(embeddings.shape[1])
@@ -160,12 +160,9 @@ def get_filter():
     # Apply filters conditionally
     if highschool_filter:
         current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
-    
-    
+   
     if college_filter:
         current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
-
-    
 
     # Convert the filtered DataFrame to JSON
     json_result = current_subset_df.to_json(orient='records')
