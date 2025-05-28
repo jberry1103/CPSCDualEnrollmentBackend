@@ -177,6 +177,13 @@ def home():
 def student_view():
     return student_string
 
+@app.route('/highschool')
+def student_view():
+    return student_string
+
+@app.route('/college')
+def student_view():
+    return student_string
 # Running app
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=10000)
