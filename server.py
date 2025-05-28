@@ -178,11 +178,11 @@ def student_view():
     return student_string
 
 @app.route('/highschool')
-def student_view():
+def highschool_filter():
     return student_string
 
 @app.route('/college')
-def student_view():
+def college_filter():
     return student_string
 # Running app
 if __name__ == '__main__':
