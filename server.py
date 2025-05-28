@@ -179,11 +179,21 @@ def student_view():
 
 @app.route('/highschool')
 def highschool_filter():
-    return student_string
+    unique_highschools =[]
+
+    for x in courses_df["High School"]: 
+        if x not in unique_highschools: 
+            unique_highschools.append(x)
+    return unique_highschools
 
 @app.route('/college')
 def college_filter():
-    return student_string
+    unique_colleges =[]
+
+    for x in courses_df["College"]: 
+        if x not in unique_colleges: 
+            unique_colleges.append(x)
+    return unique_colleges
 # Running app
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=10000)
