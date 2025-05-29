@@ -132,6 +132,7 @@ def get_data():
 @app.route('/search', methods=['POST'])
 def get_search():
     req = request.get_json()
+    print(req)
     search_input = req.get("searchInput", "")
     filters = req.get("filters", {})
     highschool_filter = filters.get("highschool", "").strip()
