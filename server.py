@@ -85,7 +85,21 @@ def get_data():
     
 @app.route('/search', methods=['POST'])
 def get_search():
-    search_input = request.get_json()
+    req = request.get_json()
+    search_input = req.get("searchInput")
+    filters = req.get("filters")
+    highschool_filter = filters.get("highschool", "").strip()
+    college_filter = filters.get("college", "").strip()
+    
+    # Start with the full DataFrame
+    current_subset_df = courses_df
+   
+    # Apply filters conditionally
+    if highschool_filter:
+        current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
+   
+    if college_filter:
+        current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
 
     texts = current_subset_df.iloc[0].astype(str).tolist()
     embeddings = model.encode(texts, convert_to_numpy=True)
