@@ -124,7 +124,7 @@ def get_search():
 
     index = faiss.IndexFlatL2(d)
     index.add(course_embeddings)
-    distances, indices = index.search(input_embedding, k=25)
+    distances, indices = index.search(input_embedding, k=2)
 
     top_rows = current_subset_df.iloc[indices[0]]
     json_string = top_rows.to_json(orient='records')
@@ -216,6 +216,3 @@ if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=10000)
     # port = int(os.environ.get('PORT', 5000))  # Use the PORT env variable or default to 5000
     app.run(host='0.0.0.0', port=5000)
-    
-
-    
