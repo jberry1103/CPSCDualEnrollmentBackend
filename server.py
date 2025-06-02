@@ -86,6 +86,7 @@ def get_data():
 @app.route('/search', methods=['POST'])
 def get_search():
     req = request.get_json()
+    
     search_input = req.get("searchInput")
     filters = req.get("filters")
     highschool_filter = filters.get("highschool", "").strip()
@@ -100,37 +101,39 @@ def get_search():
    
     if college_filter:
         current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+    json_string = current_subset_df.to_json(orient='records')
+    if len(search_input) != 0: 
+        texts = current_subset_df.iloc[0].astype(str).tolist()
+        embeddings = model.encode(texts, convert_to_numpy=True)
 
-    texts = current_subset_df.iloc[0].astype(str).tolist()
-    embeddings = model.encode(texts, convert_to_numpy=True)
+        index = faiss.IndexFlatL2(embeddings.shape[1])
+        index.add(embeddings)
 
-    index = faiss.IndexFlatL2(embeddings.shape[1])
-    index.add(embeddings)
+        # convert input to embedding
 
-    # convert input to embedding
+        input_embedding = model.encode([search_input], convert_to_numpy=True).astype('float32')
 
-    input_embedding = model.encode([search_input], convert_to_numpy=True).astype('float32')
+        #search for most similar attribute
+        distances, indices = index.search(input_embedding, k=1)
+        similar_attributes = current_subset_df.columns.to_list()
+        att_index = int(indices[0][0])
+        best_column = similar_attributes[att_index]
 
-    #search for most similar attribute
-    distances, indices = index.search(input_embedding, k=1)
-    similar_attributes = current_subset_df.columns.to_list()
-    att_index = int(indices[0][0])
-    best_column = similar_attributes[att_index]
+        # Process data
+        course_embeddings = model.encode(current_subset_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
+        d = course_embeddings.shape[1]
 
-    # Process data
-    course_embeddings = model.encode(current_subset_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
-    d = course_embeddings.shape[1]
-
-    index = faiss.IndexFlatL2(d)
-    index.add(course_embeddings)
-    distances, indices = index.search(input_embedding, k=2)
-
-    top_rows = current_subset_df.iloc[indices[0]]
-    json_string = top_rows.to_json(orient='records')
+        index = faiss.IndexFlatL2(d)
+        index.add(course_embeddings)
+        _, indices = index.search(input_embedding, k=25)
+        top_rows = current_subset_df.iloc[indices[0]]
+        json_string = top_rows.to_json(orient='records')
+    
     return json_string
 @app.route('/studentSearch', methods=['POST'])
 def get_student_search():
     req = request.get_json()
+    
     search_input = req.get("searchInput")
     filters = req.get("filters")
     highschool_filter = filters.get("highschool", "").strip()
@@ -146,32 +149,36 @@ def get_student_search():
     if college_filter:
         current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
 
-    texts = current_subset_df.iloc[0].astype(str).tolist()
-    embeddings = model.encode(texts, convert_to_numpy=True)
+    # json_string = current_subset_df.to_json(orient='records')
+    if len(search_input) != 0: 
+        texts = current_subset_df.iloc[0].astype(str).tolist()
+        embeddings = model.encode(texts, convert_to_numpy=True)
 
-    index = faiss.IndexFlatL2(embeddings.shape[1])
-    index.add(embeddings)
+        index = faiss.IndexFlatL2(embeddings.shape[1])
+        index.add(embeddings)
 
-    # convert input to embedding
+        # convert input to embedding
 
-    input_embedding = model.encode([search_input], convert_to_numpy=True).astype('float32')
+        input_embedding = model.encode([search_input], convert_to_numpy=True).astype('float32')
 
-    #search for most similar attribute
-    distances, indices = index.search(input_embedding, k=1)
-    similar_attributes = current_subset_df.columns.to_list()
-    att_index = int(indices[0][0])
-    best_column = similar_attributes[att_index]
+        #search for most similar attribute
+        _, indices = index.search(input_embedding, k=1)
+        similar_attributes = current_subset_df.columns.to_list()
+        att_index = int(indices[0][0])
+        best_column = similar_attributes[att_index]
 
-    # Process data
-    course_embeddings = model.encode(current_subset_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
-    d = course_embeddings.shape[1]
+        # Process data
+        course_embeddings = model.encode(current_subset_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
+        d = course_embeddings.shape[1]
 
-    index = faiss.IndexFlatL2(d)
-    index.add(course_embeddings)
-    distances, indices = index.search(input_embedding, k=2)
+        index = faiss.IndexFlatL2(d)
+        index.add(course_embeddings)
+        _, indices = index.search(input_embedding, k=25)
+        top_rows = current_subset_df.iloc[indices[0]]
+        current_subset_df = top_rows
 
-    top_rows = current_subset_df.iloc[indices[0]]
-    df = top_rows[['College', 'College Program', 'College Course', 'High School', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
+    
+    df = current_subset_df[['College', 'College Program', 'College Course', 'High School', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
     json_string = df.to_json(orient='records')
     return json_string
 
