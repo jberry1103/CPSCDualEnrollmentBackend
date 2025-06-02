@@ -86,7 +86,6 @@ def get_data():
 @app.route('/search', methods=['POST'])
 def get_search():
     req = request.get_json()
-    print(req)
     search_input = req.get("searchInput")
     filters = req.get("filters")
     highschool_filter = filters.get("highschool", "").strip()
@@ -131,9 +130,23 @@ def get_search():
     return json_string
 @app.route('/studentSearch', methods=['POST'])
 def get_student_search():
-    search_input = request.get_json()
+    req = request.get_json()
+    search_input = req.get("searchInput")
+    filters = req.get("filters")
+    highschool_filter = filters.get("highschool", "").strip()
+    college_filter = filters.get("college", "").strip()
+    
+    # Start with the full DataFrame
+    current_subset_df = courses_df
+   
+    # Apply filters conditionally
+    if highschool_filter:
+        current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
+   
+    if college_filter:
+        current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
 
-    texts = courses_df.iloc[0].astype(str).tolist()
+    texts = current_subset_df.iloc[0].astype(str).tolist()
     embeddings = model.encode(texts, convert_to_numpy=True)
 
     index = faiss.IndexFlatL2(embeddings.shape[1])
@@ -145,20 +158,19 @@ def get_student_search():
 
     #search for most similar attribute
     distances, indices = index.search(input_embedding, k=1)
-    similar_attributes = courses_df.columns.to_list()
+    similar_attributes = current_subset_df.columns.to_list()
     att_index = int(indices[0][0])
     best_column = similar_attributes[att_index]
 
     # Process data
-    course_embeddings = model.encode(courses_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
+    course_embeddings = model.encode(current_subset_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
     d = course_embeddings.shape[1]
 
     index = faiss.IndexFlatL2(d)
     index.add(course_embeddings)
-    distances, indices = index.search(input_embedding, k=25)
+    distances, indices = index.search(input_embedding, k=2)
 
-
-    top_rows = courses_df.iloc[indices[0]]
+    top_rows = current_subset_df.iloc[indices[0]]
     df = top_rows[['College', 'College Program', 'College Course', 'High School', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
     json_string = df.to_json(orient='records')
     return json_string
