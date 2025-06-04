@@ -125,7 +125,10 @@ def get_search():
 
         index = faiss.IndexFlatL2(d)
         index.add(course_embeddings)
-        _, indices = index.search(input_embedding, k=25)
+        if len(current_subset_df) > 25:
+            _, indices = index.search(input_embedding, k=25)
+        else: 
+            _, indices = index.search(input_embedding, k=len(current_subset_df))
         top_rows = current_subset_df.iloc[indices[0]]
         json_string = top_rows.to_json(orient='records')
     
@@ -177,7 +180,6 @@ def get_student_search():
         top_rows = current_subset_df.iloc[indices[0]]
         current_subset_df = top_rows
 
-    
     df = current_subset_df[['College', 'College Program', 'College Course', 'High School', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
     json_string = df.to_json(orient='records')
     return json_string
