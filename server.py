@@ -125,7 +125,7 @@ def get_search():
 
         index = faiss.IndexFlatL2(d)
         index.add(course_embeddings)
-        if len(current_subset_df) > 25:
+        if len(current_subset_df) >= 25:
             _, indices = index.search(input_embedding, k=25)
         else: 
             _, indices = index.search(input_embedding, k=len(current_subset_df))
@@ -176,7 +176,10 @@ def get_student_search():
 
         index = faiss.IndexFlatL2(d)
         index.add(course_embeddings)
-        _, indices = index.search(input_embedding, k=25)
+        if len(current_subset_df) >= 25:
+            _, indices = index.search(input_embedding, k=25)
+        else: 
+            _, indices = index.search(input_embedding, k=len(current_subset_df))
         top_rows = current_subset_df.iloc[indices[0]]
         current_subset_df = top_rows
 
