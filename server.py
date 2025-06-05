@@ -47,16 +47,10 @@ def get_time():
     data = request.get_json()
     input_course_name = data['name']
     input_course_description = data["description"]
-
-    course_embeddings = model.encode(courses_df["HS Course Description"].tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
-    d = course_embeddings.shape[1]
-
-
-    # Create FAISS similarity search
-    index = faiss.IndexFlatL2(d)  # L2 distance index (Euclidean)
-    index.add(course_embeddings)  # Add all course vectors to the index
     
+    # Convert input course to an embedding
     input_embedding = model.encode([input_course_description], convert_to_numpy=True).astype('float32')
+
     #  Search for the most similar courses
     distances, indices = index.search(input_embedding, k=10)  
     # Get the top matching courses
