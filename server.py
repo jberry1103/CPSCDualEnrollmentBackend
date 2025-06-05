@@ -133,6 +133,8 @@ def get_search():
         json_string = top_rows.to_json(orient='records')
     
     return json_string
+
+
 @app.route('/studentSearch', methods=['POST'])
 def get_student_search():
     req = request.get_json()
@@ -183,7 +185,7 @@ def get_student_search():
         top_rows = current_subset_df.iloc[indices[0]]
         current_subset_df = top_rows
 
-    df = current_subset_df[['College', 'College Program', 'College Course', 'High School', 'College Course Name', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
+    df = courses_df[['College', 'College Program', 'College Course', 'College Course Name', 'High School', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
     json_string = df.to_json(orient='records')
     return json_string
 
@@ -204,6 +206,28 @@ def get_filter():
         current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
 
     # Convert the filtered DataFrame to JSON
+    json_result = current_subset_df.to_json(orient='records')
+
+    return json_result
+
+@app.route('/studentfilter', methods=['POST'])
+def get_student_filter():
+    filters = request.get_json()
+    highschool_filter = filters.get("highschool", "").strip()
+    college_filter = filters.get("college", "").strip()
+
+    # Start with the full DataFrame
+    current_subset_df = courses_df
+   
+    # Apply filters conditionally
+    if highschool_filter:
+        current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
+   
+    if college_filter:
+        current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+
+    # Convert the filtered DataFrame to JSON
+    current_subset_df = current_subset_df[['College', 'College Program', 'College Course', 'College Course Name', 'High School', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
     json_result = current_subset_df.to_json(orient='records')
 
     return json_result
