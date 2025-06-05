@@ -57,6 +57,7 @@ def get_time():
     # Get the top matching courses
     similar_courses = courses_df.iloc[indices[0]].copy()
     similar_courses["Similarity_Score"] = 1 / (1 + distances[0])  # Convert distance to similarity score (higher is better)
+    print(similar_courses)
     similar_course_names = similar_courses["College Course Name"]
     similar_course_descriptions = similar_courses["College Course Description"]
     similar_course_colleges = similar_courses["College"]
