@@ -45,7 +45,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 @app.route('/data', methods=['POST'])
 def get_time():
     data = request.get_json()
-    input_course_name = data['name']
+    _ = data['name']
     input_course_description = data["description"]
     
     # Convert input course to an embedding
@@ -249,6 +249,7 @@ def highschool_filter():
 
 @app.route('/collegeFilter')
 def college_filter():
+    #Checks for the unique values all with that name
     unique_colleges =[]
 
     for x in courses_df["College"]: 
