@@ -62,7 +62,7 @@ def get_time():
     similar_course_descriptions = similar_courses["College Course Description"]
     similar_course_colleges = similar_courses["College"]
     similar_course_numbers = similar_courses["College Course"]
-        
+    print(similar_course_numbers)
     
     return {
       'name1': similar_course_names.iloc[0],
