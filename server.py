@@ -246,7 +246,8 @@ def highschool_filter():
     for x in courses_df["High School"]: 
         if x not in unique_highschools: 
             unique_highschools.append(x)
-    return unique_highschools
+    sorted_unique_highschools = sorted(unique_highschools)
+    return sorted_unique_highschools
 
 @app.route('/collegeFilter')
 def college_filter():
@@ -256,7 +257,9 @@ def college_filter():
     for x in courses_df["College"]: 
         if x not in unique_colleges: 
             unique_colleges.append(x)
-    return unique_colleges
+    sorted_unique_colleges = sorted(unique_colleges)
+    return sorted_unique_colleges
+
 
 
 # Running app
