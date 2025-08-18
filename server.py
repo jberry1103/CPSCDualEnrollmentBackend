@@ -7,7 +7,8 @@ from flask import Flask, request
 from sentence_transformers import SentenceTransformer
 import numpy as np
 
-courses_df = pd.read_csv("output_data/output_course_data.csv")
+courses_df_unsorted = pd.read_csv("output_data/output_course_data.csv")
+courses_df = courses_df_unsorted.sort_values(by="College")
 current_subset_df = courses_df
 
 json_string = courses_df.to_json(orient='records')
