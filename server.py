@@ -246,7 +246,7 @@ def highschool_filter():
     for x in courses_df["High School"]: 
         if x not in unique_highschools: 
             unique_highschools.append(x)
-    sorted_unique_highschools = sorted(unique_highschools)
+    sorted_unique_highschools = sorted(unique_highschools) #Alphabetizes filter
     return sorted_unique_highschools
 
 @app.route('/collegeFilter')
@@ -259,6 +259,26 @@ def college_filter():
             unique_colleges.append(x)
     sorted_unique_colleges = sorted(unique_colleges)
     return sorted_unique_colleges
+
+@app.route('/schooldistrictFilter')
+def school_district_filter():
+    unique_school_districts =[]
+
+    for x in courses_df["School District"]: 
+        if x not in unique_school_districts: 
+            unique_school_districts.append(x)
+    sorted_unique_school_districts = sorted(unique_school_districts)
+    return sorted_unique_school_districts
+
+@app.route('/careerclusterFilter')
+def career_cluster_filter():
+    unique_career_cluster =[]
+
+    for x in courses_df["Career Cluster"]: 
+        if x not in unique_career_cluster: 
+            unique_career_cluster.append(x)
+    sorted_unique_career_cluster = sorted(unique_career_cluster)
+    return sorted_unique_career_cluster
 
 
 
