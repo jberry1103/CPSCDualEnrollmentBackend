@@ -90,6 +90,8 @@ def get_search():
     filters = req.get("filters")
     highschool_filter = filters.get("highschool", "").strip()
     college_filter = filters.get("college", "").strip()
+    school_district_filter = filters.get("schooldistrict", "").strip()
+    career_cluster_filter = filters.get("careercluster", "").strip()
     
     # Start with the full DataFrame
     current_subset_df = courses_df
@@ -100,6 +102,13 @@ def get_search():
    
     if college_filter:
         current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+
+    if school_district_filter:
+        current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
+
+    if career_cluster_filter:
+        current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
+
     json_string = current_subset_df.to_json(orient='records')
     if len(search_input) != 0: 
         texts = current_subset_df.iloc[0].astype(str).tolist()
@@ -142,6 +151,8 @@ def get_student_search():
     filters = req.get("filters")
     highschool_filter = filters.get("highschool", "").strip()
     college_filter = filters.get("college", "").strip()
+    school_district_filter = filters.get("schooldistrict", "").strip()
+    career_cluster_filter = filters.get("careercluster", "").strip()
     
     # Start with the full DataFrame
     current_subset_df = courses_df
@@ -153,6 +164,11 @@ def get_student_search():
     if college_filter:
         current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
 
+    if school_district_filter:
+        current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
+
+    if career_cluster_filter:
+        current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
     # json_string = current_subset_df.to_json(orient='records')
     if len(search_input) != 0: 
         texts = current_subset_df.iloc[0].astype(str).tolist()
@@ -180,7 +196,7 @@ def get_student_search():
         if len(current_subset_df) >= 25:
             _, indices = index.search(input_embedding, k=25)
         else: 
-            _, indices = index.search(input_embedding, k=len(current_subset_df))
+        _, indices = index.search(input_embedding, k=len(current_subset_df))
         top_rows = current_subset_df.iloc[indices[0]]
         current_subset_df = top_rows
 
@@ -193,6 +209,8 @@ def get_filter():
     filters = request.get_json()
     highschool_filter = filters.get("highschool", "").strip()
     college_filter = filters.get("college", "").strip()
+    school_district_filter = filters.get("schooldistrict", "").strip()
+    career_cluster_filter = filters.get("careercluster", "").strip()
 
     # Start with the full DataFrame
     current_subset_df = courses_df
@@ -203,6 +221,12 @@ def get_filter():
    
     if college_filter:
         current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+
+    if school_district_filter:
+        current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
+
+    if career_cluster_filter:
+        current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
 
     # Convert the filtered DataFrame to JSON
     json_result = current_subset_df.to_json(orient='records')
@@ -214,6 +238,8 @@ def get_student_filter():
     filters = request.get_json()
     highschool_filter = filters.get("highschool", "").strip()
     college_filter = filters.get("college", "").strip()
+    school_district_filter = filters.get("schooldistrict", "").strip()
+    career_cluster_filter = filters.get("careercluster", "").strip()
 
     # Start with the full DataFrame
     current_subset_df = courses_df
@@ -224,6 +250,12 @@ def get_student_filter():
    
     if college_filter:
         current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+
+    if school_district_filter:
+        current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
+
+    if career_cluster_filter:
+        current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
 
     # Convert the filtered DataFrame to JSON
     current_subset_df = current_subset_df[['College', 'College Program', 'College Course', 'College Course Name', 'High School', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
