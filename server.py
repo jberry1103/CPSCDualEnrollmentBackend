@@ -338,7 +338,25 @@ def career_cluster_filter():
     sorted_unique_career_cluster = sorted(unique_career_cluster)
     return sorted_unique_career_cluster
 
+@app.route('/academicyearFilter')
+def career_cluster_filter():
+    unique_academic_years =[]
 
+    for x in courses_df["Academic Years"]: 
+        if x not in unique_academic_years: 
+            unique_academic_years.append(x)
+    sorted_unique_academic_years = sorted(unique_academic_years)
+    return sorted_unique_academic_years
+
+@app.route('/statusFilter')
+def career_cluster_filter():
+    unique_status =[]
+
+    for x in courses_df["Status of Articulation"]: 
+        if x not in unique_status: 
+            unique_status.append(x)
+    sorted_unique_status = sorted(unique_status)
+    return sorted_unique_status
 
 # Running app
 if __name__ == '__main__':
