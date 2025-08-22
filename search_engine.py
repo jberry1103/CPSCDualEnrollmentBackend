@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import faiss
 import re
-from collections import defaultdict
 
 def _normalize_rows(df, cols):
     for c in cols:
@@ -86,7 +85,7 @@ def general_search(query, df, model, indices, top_k_per_col=25, min_results=10, 
     q = q / (np.linalg.norm(q, axis=1, keepdims=True) + 1e-12)
 
     # Score accumulator per row
-    row_scores = defaultdict(float)
+    row_scores = {}
 
     # Substring / exact-match lightweight boost (case-insensitive)
     qlow = query.strip().lower()
@@ -99,11 +98,13 @@ def general_search(query, df, model, indices, top_k_per_col=25, min_results=10, 
         # Exact matches get a solid bump; substrings a smaller one
         exact_rows = df.index[exact_mask].to_numpy().astype("int64")
         for r in exact_rows:
-            row_scores[r] += 2.0 * col_weights.get(col, 1.0)
+            k = int(r)
+            row_scores[k] = row_scores.get(k, 0.0) + 2.0 * col_weights.get(col, 1.0)
             substring_hits.add(r)
         contains_rows = df.index[contains_mask].tolist()
         for r in contains_rows:
-            row_scores[r] += 0.5 * col_weights.get(col, 1.0)
+            k = int(r)
+            row_scores[k] = row_scores.get(k, 0.0) + 0.5 * col_weights.get(col, 1.0)
 
     # FAISS search per column + weighted aggregation
     for col, pack in indices.items():
@@ -114,8 +115,9 @@ def general_search(query, df, model, indices, top_k_per_col=25, min_results=10, 
         w = col_weights.get(col, 1.0)
         for sim, row_id in zip(sims, rows):
             # Small extra bump if we also substring-hit the same row
-            bonus = 0.25 if row_id in substring_hits else 0.0
-            row_scores[row_id] += w * (sim + bonus)
+            k = int(row_id)
+            bonus = 0.25 if k in substring_hits else 0.0
+            row_scores[k] = row_scores.get(k, 0.0) + w * (float(sim) + bonus)
 
     # Rank rows
     if not row_scores:
