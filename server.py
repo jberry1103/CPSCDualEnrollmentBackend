@@ -170,7 +170,7 @@ def get_student_search():
         current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == career_cluster_filter.lower()]
     
     if status_filter:
-        current_subset_df = current_subset_df[current_subset_df["Status"].str.lower() == career_cluster_filter.lower()]
+        current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == career_cluster_filter.lower()]
 
     # json_string = current_subset_df.to_json(orient='records')
     if len(search_input) != 0:
