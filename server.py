@@ -112,42 +112,19 @@ def get_search():
         current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
 
     json_string = current_subset_df.to_json(orient='records')
-    if len(search_input) != 0: 
-        '''
-        texts = current_subset_df.iloc[0].astype(str).tolist()
-        embeddings = model.encode(texts, convert_to_numpy=True)
+    
+    if len(search_input) != 0:
+        if len(courses_df) <= 100: # setting the number of rows used to train search algorithm
+            top_k = len(courses_df-1)
+        else:
+            top_k = 100
 
-        index = faiss.IndexFlatL2(embeddings.shape[1])
-        index.add(embeddings)
-
-        # convert input to embedding
-
-        input_embedding = model.encode([search_input], convert_to_numpy=True).astype('float32')
-
-        #search for most similar attribute
-        distances, indices = index.search(input_embedding, k=1)
-        similar_attributes = current_subset_df.columns.to_list()
-        att_index = int(indices[0][0])
-        best_column = similar_attributes[att_index]
-
-        # Process data
-        course_embeddings = model.encode(current_subset_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
-        d = course_embeddings.shape[1]
-
-        index = faiss.IndexFlatL2(d)
-        index.add(course_embeddings)
-        if len(current_subset_df) >= 25:
-            _, indices = index.search(input_embedding, k=25)
-        else: 
-            _, indices = index.search(input_embedding, k=len(current_subset_df))
-        top_rows = current_subset_df.iloc[indices[0]]
-        '''
         results = general_search(
             query=search_input,
             df=courses_df,
             model=model,
             indices=general_indices,
-            top_k_per_col=25,   # tweak if you want faster/slower
+            top_k_per_col=top_k,   # tweak if you want faster/slower
             min_results=10,     # guarantee at least 10 results
             rel_threshold=0.60, # keep everything over 60% match
             max_results=None # can cap results if needed
@@ -185,41 +162,16 @@ def get_student_search():
         current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
     # json_string = current_subset_df.to_json(orient='records')
     if len(search_input) != 0: 
-        '''
-        texts = current_subset_df.iloc[0].astype(str).tolist()
-        embeddings = model.encode(texts, convert_to_numpy=True)
-
-        index = faiss.IndexFlatL2(embeddings.shape[1])
-        index.add(embeddings)
-
-        # convert input to embedding
-
-        input_embedding = model.encode([search_input], convert_to_numpy=True).astype('float32')
-
-        #search for most similar attribute
-        _, indices = index.search(input_embedding, k=1)
-        similar_attributes = current_subset_df.columns.to_list()
-        att_index = int(indices[0][0])
-        best_column = similar_attributes[att_index]
-
-        # Process data
-        course_embeddings = model.encode(current_subset_df[best_column].astype(str).tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
-        d = course_embeddings.shape[1]
-
-        index = faiss.IndexFlatL2(d)
-        index.add(course_embeddings)
-        if len(current_subset_df) >= 25:
-            _, indices = index.search(input_embedding, k=25)
-        else: 
-        _, indices = index.search(input_embedding, k=len(current_subset_df))
-        top_rows = current_subset_df.iloc[indices[0]]
-        '''
+        if len(courses_df) <= 100: # setting the number of rows used to train search algorithm
+            top_k = len(courses_df-1)
+        else:
+            top_k = 100
         results = general_search(
             query=search_input,
             df=courses_df,
             model=model,
             indices=general_indices,
-            top_k_per_col=25,   # tweak if you want faster/slower
+            top_k_per_col=top_k,   # tweak if you want faster/slower
             min_results=10,     # guarantee at least 10 results
             rel_threshold=0.60, # keep everything over 60% match
             max_results=None # can cap results if needed
