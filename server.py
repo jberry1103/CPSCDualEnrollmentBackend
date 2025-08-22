@@ -6,6 +6,7 @@ import faiss
 from flask import Flask, request
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from search_engine import build_general_indices, general_search
 
 courses_df_unsorted = pd.read_csv("output_data/output_course_data.csv")
 courses_df = courses_df_unsorted.sort_values(by="College")
@@ -27,6 +28,7 @@ f = open(filename, "a")
 # Process data
 course_embeddings = model.encode(courses_df["HS Course Description"].tolist(), convert_to_numpy=True).astype('float32') # Course Descriptions
 d = course_embeddings.shape[1]
+general_indices = build_general_indices(courses_df, model) # used in search
 
 
 # Create FAISS similarity search
@@ -111,6 +113,7 @@ def get_search():
 
     json_string = current_subset_df.to_json(orient='records')
     if len(search_input) != 0: 
+        '''
         texts = current_subset_df.iloc[0].astype(str).tolist()
         embeddings = model.encode(texts, convert_to_numpy=True)
 
@@ -138,7 +141,18 @@ def get_search():
         else: 
             _, indices = index.search(input_embedding, k=len(current_subset_df))
         top_rows = current_subset_df.iloc[indices[0]]
-        json_string = top_rows.to_json(orient='records')
+        '''
+        results = general_search(
+            query=search_input,
+            df=courses_df,
+            model=model,
+            indices=general_indices,
+            top_k_per_col=25,   # tweak if you want faster/slower
+            min_results=10,     # guarantee at least 10 results
+            rel_threshold=0.60, # keep everything over 60% match
+            max_results=None # can cap results if needed
+        )
+        json_string = results.to_json(orient='records')
     
     return json_string
 
@@ -171,6 +185,7 @@ def get_student_search():
         current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
     # json_string = current_subset_df.to_json(orient='records')
     if len(search_input) != 0: 
+        '''
         texts = current_subset_df.iloc[0].astype(str).tolist()
         embeddings = model.encode(texts, convert_to_numpy=True)
 
@@ -198,7 +213,18 @@ def get_student_search():
         else: 
         _, indices = index.search(input_embedding, k=len(current_subset_df))
         top_rows = current_subset_df.iloc[indices[0]]
-        current_subset_df = top_rows
+        '''
+        results = general_search(
+            query=search_input,
+            df=courses_df,
+            model=model,
+            indices=general_indices,
+            top_k_per_col=25,   # tweak if you want faster/slower
+            min_results=10,     # guarantee at least 10 results
+            rel_threshold=0.60, # keep everything over 60% match
+            max_results=None # can cap results if needed
+        )
+        current_subset_df = results
 
     df = current_subset_df[['College', 'College Program', 'College Course', 'College Course Name', 'High School', 'HS Course Name', 'HS Course Description', 'HS Course Credits', 'Academic Years']]
     json_string = df.to_json(orient='records')
