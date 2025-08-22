@@ -112,19 +112,14 @@ def get_search():
         current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
 
     json_string = current_subset_df.to_json(orient='records')
-    
-    if len(search_input) != 0:
-        if len(courses_df) <= 100: # setting the number of rows used to train search algorithm
-            top_k = len(courses_df-1)
-        else:
-            top_k = 100
 
+    if len(search_input) != 0:
         results = general_search(
             query=search_input,
             df=courses_df,
             model=model,
             indices=general_indices,
-            top_k_per_col=top_k,   # tweak if you want faster/slower
+            top_k_per_col=30,   # tweak if you want faster/slower OR if dataset is smaller than 30
             min_results=10,     # guarantee at least 10 results
             rel_threshold=0.60, # keep everything over 60% match
             max_results=None # can cap results if needed
@@ -161,17 +156,13 @@ def get_student_search():
     if career_cluster_filter:
         current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
     # json_string = current_subset_df.to_json(orient='records')
-    if len(search_input) != 0: 
-        if len(courses_df) <= 100: # setting the number of rows used to train search algorithm
-            top_k = len(courses_df-1)
-        else:
-            top_k = 100
+    if len(search_input) != 0:
         results = general_search(
             query=search_input,
             df=courses_df,
             model=model,
             indices=general_indices,
-            top_k_per_col=top_k,   # tweak if you want faster/slower
+            top_k_per_col=30,   # tweak if you want faster/slower OR if dataset smaller than 30
             min_results=10,     # guarantee at least 10 results
             rel_threshold=0.60, # keep everything over 60% match
             max_results=None # can cap results if needed
