@@ -117,10 +117,10 @@ def get_search():
         current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
     
     if academic_year_filter:
-        current_subset_df = current_subset_df[current_subset_df["Academic Year"].str.lower() == career_cluster_filter.lower()]
+        current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == career_cluster_filter.lower()]
     
     if status_filter:
-        current_subset_df = current_subset_df[current_subset_df["Status"].str.lower() == career_cluster_filter.lower()]
+        current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == career_cluster_filter.lower()]
 
     json_string = current_subset_df.to_json(orient='records')
 
@@ -170,10 +170,10 @@ def get_student_search():
         current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
 
     if academic_year_filter:
-        current_subset_df = current_subset_df[current_subset_df["Academic Year"].str.lower() == career_cluster_filter.lower()]
+        current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == career_cluster_filter.lower()]
     
     if status_filter:
-        current_subset_df = current_subset_df[current_subset_df["Status"].str.lower() == career_cluster_filter.lower()]
+        current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == career_cluster_filter.lower()]
 
     # json_string = current_subset_df.to_json(orient='records')
     if len(search_input) != 0:
@@ -222,10 +222,10 @@ def get_filter():
         current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
 
     if academic_year_filter:
-        current_subset_df = current_subset_df[current_subset_df["Academic Year"].str.lower() == career_cluster_filter.lower()]
+        current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == career_cluster_filter.lower()]
 
     if status_filter:
-        current_subset_df = current_subset_df[current_subset_df["Status"].str.lower() == career_cluster_filter.lower()]
+        current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == career_cluster_filter.lower()]
 
     # Convert the filtered DataFrame to JSON
     json_result = current_subset_df.to_json(orient='records')
@@ -259,10 +259,10 @@ def get_student_filter():
         current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
     
     if academic_year_filter:
-        current_subset_df = current_subset_df[current_subset_df["Academic Year"].str.lower() == career_cluster_filter.lower()]
+        current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == career_cluster_filter.lower()]
     
     if status_filter:
-        current_subset_df = current_subset_df[current_subset_df["Status"].str.lower() == career_cluster_filter.lower()]
+        current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == career_cluster_filter.lower()]
 
     # Convert the filtered DataFrame to JSON
     current_subset_df = current_subset_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
