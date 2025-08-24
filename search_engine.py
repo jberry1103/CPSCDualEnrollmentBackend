@@ -1,3 +1,8 @@
+'''
+This file handles the general search bar (for both admin and student views)
+'''
+
+
 from sentence_transformers import SentenceTransformer
 import pandas as pd
 import numpy as np
@@ -35,16 +40,17 @@ def _column_base_weights():
         "HS Course Name": 1.1,
         "HS Course Description": 1.2,
         "College Course CIP Code": 1.0,
-        "HS Course CIP Code"
+        "HS Course CIP Code": 1.0,
         "Career Cluster": 0.9,
         "High School": 0.9,
         "College": 0.9,
     }
 
 def _query_boosts(query):
+    # This helper function improves accuracy for search terms that are unique, not real words (ENGL 101, 56.9038, etc)
     boosts = {}
     if CIP_RE.match(query or ""):
-        boosts["College Course CIP Code"] = 1.4
+        boosts["College Course CIP Code"] = 1.4 # the 11.0201 numeric pattern will almost always be a college cip code
     if COURSE_RE.match(query or ""):
         boosts["College Course"] = 1.3
         boosts["College Course Name"] = 1.15
@@ -68,7 +74,17 @@ def build_general_indices(df, model, cols=GENERAL_SEARCH_COLS):
         indices[col] = {"index": index, "embs": embs}
     return indices
 
-
+'''
+This function runs the backend search algorithm,
+    query: the input search term
+    df: the courses dataset (this can be small when filters are applied)
+    model: sentence transformer model, as defined in server.py (this should not change)
+    indices: indices used for FAISS (ai algorithm)
+    top_k_per_col: amount of rows used for sample (training) dataset. Too many rows can cause hallucination. Default 25.
+    min_results: the user will always see this many courses. Default 10
+    rel_threshold: courses with over a certain percent match will be presented to the user. Default 60%
+    max_results: the user will not see more than this many courses. Default none
+'''
 def general_search(query, df, model, indices, top_k_per_col=25, min_results=10, rel_threshold=0.60, max_results=None):
     
     if not query or not query.strip():

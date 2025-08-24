@@ -1,3 +1,13 @@
+'''
+This file runs all of the backend function calls, including...
+    Reading data from CSV and organizing it before printing it to the user
+    AI Similarity Search
+    Filters
+    General Search Bar (calls search_engine.py)
+'''
+
+
+
 import os
 from flask import Flask
 import pandas as pd
