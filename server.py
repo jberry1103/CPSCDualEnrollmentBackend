@@ -212,7 +212,7 @@ def get_filter():
     academic_year_filter = filters.get("academicyear", "").strip()
     status_filter = filters.get("status", "").strip()
     admin_alphabetical_filter = filters.get("adminalphabetical", "").strip()
-
+    print(admin_alphabetical_filter)
 
     # Start with the full DataFrame
     current_subset_df = courses_df
