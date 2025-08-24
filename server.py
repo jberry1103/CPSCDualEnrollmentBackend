@@ -358,14 +358,14 @@ def status_filter():
 
 @app.route('/adminalphabeticalFilter')
 def admin_alphabetical_filter():
-    admin_column_headers = [["Career Cluster", "School District", "High School", "HS Course Name", 
-                            "College", "Articulation", "College Program", "College Course", "College Course Name"]]
+    admin_column_headers = ["Career Cluster", "School District", "High School", "HS Course Name", 
+                            "College", "Articulation", "College Program", "College Course", "College Course Name"]
     return admin_column_headers
 
 @app.route('/studentalphabeticalFilter')
 def student_alphabetical_filter():
-    admin_column_headers = [['School District', 'High School', 'HS Course Name', 'College',
-                            'College Course', 'College Course Name']]
+    admin_column_headers = ['School District', 'High School', 'HS Course Name', 'College',
+                            'College Course', 'College Course Name']
     return admin_column_headers
 
 
