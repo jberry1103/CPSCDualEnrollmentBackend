@@ -6,8 +6,6 @@ This file runs all of the backend function calls, including...
     General Search Bar (calls search_engine.py)
 '''
 
-
-
 import os
 from flask import Flask
 import pandas as pd
@@ -213,6 +211,7 @@ def get_filter():
     career_cluster_filter = filters.get("careercluster", "").strip()
     academic_year_filter = filters.get("academicyear", "").strip()
     status_filter = filters.get("status", "").strip()
+    admin_alphabetical_filter = filters.get("adminalphabetical", "").strip()
 
 
     # Start with the full DataFrame
@@ -236,6 +235,9 @@ def get_filter():
 
     if status_filter:
         current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
+    
+    if admin_alphabetical_filter:
+        current_subset_df = current_subset_df.sort_values(by=admin_alphabetical_filter)
 
     # Convert the filtered DataFrame to JSON
     json_result = current_subset_df.to_json(orient='records')
@@ -251,6 +253,7 @@ def get_student_filter():
     career_cluster_filter = filters.get("careercluster", "").strip()
     academic_year_filter = filters.get("academicyear", "").strip()
     status_filter = filters.get("status", "").strip()
+    student_alphabetical_filter = filters.get("studentalphabetical", "").strip()
 
     # Start with the full DataFrame
     current_subset_df = courses_df
@@ -273,6 +276,9 @@ def get_student_filter():
     
     if status_filter:
         current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
+    
+    if student_alphabetical_filter:
+        current_subset_df = current_subset_df.sort_values(by=student_alphabetical_filter)
 
     # Convert the filtered DataFrame to JSON
     current_subset_df = current_subset_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
@@ -349,6 +355,19 @@ def status_filter():
             unique_status.append(x)
     sorted_unique_status = sorted(unique_status)
     return sorted_unique_status
+
+@app.route('/adminalphabeticalFilter')
+def admin_alphabetical_filter():
+    admin_column_headers = [["Career Cluster", "School District", "High School", "HS Course Name", 
+                            "College", "Articulation", "College Program", "College Course", "College Course Name"]]
+    return admin_column_headers
+
+@app.route('/studentalphabeticalFilter')
+def student_alphabetical_filter():
+    admin_column_headers = [['School District', 'High School', 'HS Course Name', 'College',
+                            'College Course', 'College Course Name']]
+    return admin_column_headers
+
 
 # Running app
 if __name__ == '__main__':
