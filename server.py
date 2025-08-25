@@ -64,7 +64,7 @@ courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
 #courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
 courses_df_unsorted = pd.read_csv("output_data/output_course_data.csv")
 courses_df = courses_df_unsorted.sort_values(by="Career Cluster") # sorting alphabetically for admin view
-courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name']) # Hidden Columns
+courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1) # Hidden Columns
 current_subset_df = courses_df
 
 json_string = courses_df.to_json(orient='records')
@@ -404,7 +404,7 @@ def status_filter():
 @app.route('/adminalphabeticalFilter')
 def admin_alphabetical_filter():
     admin_column_headers = ["Career Cluster", "School District", "High School", "HS Course Name", 
-                            "College", "Articulation", "College Program", "College Course", "College Course Name"]
+                            "College", "Applicable College Program", "College Course", "College Course Name"]
     return admin_column_headers
 
 @app.route('/studentalphabeticalFilter')
