@@ -7,7 +7,7 @@ This file runs all of the backend function calls, including...
 '''
 
 import os
-from flask import Flask
+from flask import Flask, jsonify
 import pandas as pd
 from flask_cors import CORS
 import faiss
@@ -15,7 +15,51 @@ from flask import Flask, request
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from search_engine import build_general_indices, general_search
+from sqlalchemy import create_engine, text, MetaData, Table, Column, Float, String, Text
+from sqlalchemy.orm import sessionmaker
+from werkzeug.utils import secure_filename
+UPLOAD_FOLDER = os.path.join('output_data')
+ALLOWED_EXTENSIONS = {'csv'}
 
+# Define your database URL — change this to your actual DB
+engine = create_engine('sqlite:///nwesd.db') 
+metadata = MetaData()
+
+# Define the table
+articulations = Table('articulations', metadata,
+    Column('career_cluster', String, key='Career Cluster'),
+    Column('school_district', String, key='School District'),
+    Column('high_school', String, key='High School'),
+    Column('hs_course_name', String, key='HS Course Name'),
+    Column('hs_course_credits', Float, key='HS Course Credits'),
+    Column('hs_course_description', Text, key='HS Course Description'),
+    Column('type_of_credit', String, key='Type of Credit'),
+    Column('hs_course_cip_code', String, key='HS Course CIP Code'),
+    Column('college', String, key='College'),
+    Column('articulation', String, key='Articulation'),
+    Column('college_program', String, key='College Program'),
+    Column('college_course', String, key='College Course'),
+    Column('college_course_name', String, key='College Course Name'),
+    Column('college_course_description', Text, key='College Course Description'),
+    Column('college_credits', Float, key='College Credits'),
+    Column('college_course_cip_code', String, key='College Course CIP Code'),
+    Column('academic_years', String, key='Academic Years'),
+    Column('status_of_articulation', String, key='Status of Articulation'),
+)
+
+# Create the table in the database
+metadata.create_all(engine)
+
+# Create session (optional, if you want to query or insert)
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# Example: fetch data
+result = session.execute(text("SELECT * FROM articulations"))
+
+
+courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
+#courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
 courses_df_unsorted = pd.read_csv("output_data/output_course_data.csv")
 courses_df = courses_df_unsorted.sort_values(by="Career Cluster") # sorting alphabetically for admin view
 current_subset_df = courses_df
@@ -45,10 +89,6 @@ general_indices = build_general_indices(courses_df, model) # used in search
 # Create FAISS similarity search
 index = faiss.IndexFlatL2(d)  # L2 distance index (Euclidean)
 index.add(course_embeddings)  # Add all course vectors to the index
-
-
-    
-
 
 # # Initializing flask app
 app = Flask(__name__)
@@ -368,6 +408,27 @@ def student_alphabetical_filter():
                             'College Course', 'College Course Name']
     return admin_column_headers
 
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if file:
+        filename = file.filename
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        try:
+            df = pd.read_csv(filepath)
+            df.to_sql('articulations', con=engine, if_exists='append', index=False)
+        except Exception as e:
+            return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
+
+        return jsonify({'message': 'File uploaded and data saved successfully', 'filename': filename}), 200
 
 # Running app
 if __name__ == '__main__':
