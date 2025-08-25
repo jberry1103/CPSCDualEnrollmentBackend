@@ -419,7 +419,7 @@ def upload_file():
 
     if file:
         filename = file.filename
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        filepath = os.path.join("output_data", filename)
         file.save(filepath)
 
         try:
