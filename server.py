@@ -36,15 +36,17 @@ articulations = Table('articulations', metadata,
     Column('type_of_credit', String, key='Type of Credit'),
     Column('hs_course_cip_code', String, key='HS Course CIP Code'),
     Column('college', String, key='College'),
-    Column('articulation', String, key='Articulation'),
-    Column('college_program', String, key='College Program'),
     Column('college_course', String, key='College Course'),
     Column('college_course_name', String, key='College Course Name'),
-    Column('college_course_description', Text, key='College Course Description'),
     Column('college_credits', Float, key='College Credits'),
+    Column('college_course_description', Text, key='College Course Description'),
+    Column('applicable_college_program', String, key='Applicable College Program'),
     Column('college_course_cip_code', String, key='College Course CIP Code'),
     Column('academic_years', String, key='Academic Years'),
     Column('status_of_articulation', String, key='Status of Articulation'),
+    Column('articulation', String, key='Articulation'),
+    Column('high_school_teacher_name', String, key='High School Teacher Name'),
+    Column('consortium_name', String, key='Consortium Name'),
 )
 
 # Create the table in the database
@@ -62,14 +64,15 @@ courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
 #courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
 courses_df_unsorted = pd.read_csv("output_data/output_course_data.csv")
 courses_df = courses_df_unsorted.sort_values(by="Career Cluster") # sorting alphabetically for admin view
+courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name']) # Hidden Columns
 current_subset_df = courses_df
 
 json_string = courses_df.to_json(orient='records')
-df_unsorted = courses_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
-                  'College Course', 'College Course Name', 'College Credits', 'Type of Credit', 'Academic Years']] # adjust this to change what columns are visible in student view
+df_unsorted_student = courses_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
+                  'College Course', 'College Course Name', 'College Credits', 'Applicable College Program', 'Type of Credit', 'Academic Years']] # adjust this to change what columns are visible in student view
 # NOTE any changes made to the student view columns here needs to be reflected in the student view search results
 # Otherwise the search results could show admin only columns from the student view
-df = df_unsorted.sort_values(by='School District') # sorting alphabetically for student view
+df = df_unsorted_student.sort_values(by='School District') # sorting alphabetically for student view
 student_string = df.to_json(orient='records')
 data_list = []
 
@@ -317,12 +320,14 @@ def get_student_filter():
     if status_filter:
         current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
     
-    if student_alphabetical_filter:
-        current_subset_df = current_subset_df.sort_values(by=student_alphabetical_filter)
 
     # Convert the filtered DataFrame to JSON
     current_subset_df = current_subset_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
                   'College Course', 'College Course Name', 'College Credits', 'Type of Credit', 'Academic Years']]
+    
+    if student_alphabetical_filter:
+        current_subset_df = current_subset_df.sort_values(by=student_alphabetical_filter)
+    
     json_result = current_subset_df.to_json(orient='records')
 
     return json_result
