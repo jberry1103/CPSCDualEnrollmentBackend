@@ -421,14 +421,14 @@ def upload_file():
         filename = file.filename
         filepath = os.path.join("output_data", filename)
         file.save(filepath)
+        return jsonify({ 'filename': filepath}), 200
+        # try:
+        #     df = pd.read_csv(filepath)
+        #     df.to_sql('articulations', con=engine, if_exists='append', index=False)
+        # except Exception as e:
+        #     return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
 
-        try:
-            df = pd.read_csv(filepath)
-            df.to_sql('articulations', con=engine, if_exists='append', index=False)
-        except Exception as e:
-            return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
-
-        return jsonify({'message': 'File uploaded and data saved successfully', 'filename': filename}), 200
+        # return jsonify({'message': 'File uploaded and data saved successfully', 'filename': filename}), 200
 
 # Running app
 if __name__ == '__main__':
