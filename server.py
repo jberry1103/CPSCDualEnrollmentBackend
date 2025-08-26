@@ -106,11 +106,10 @@ courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Conso
 current_subset_df = courses_df
 
 json_string = courses_df.to_json(orient='records')
+# adjust this to change what columns are visible in student view
 student_courses = ['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
                   'College Course', 'College Course Name', 'College Credits', 'Applicable College Program', 'Type of Credit', 'Academic Years']
-df_unsorted_student = courses_df[student_courses] # adjust this to change what columns are visible in student view
-# NOTE any changes made to the student view columns here needs to be reflected in the student view search results
-# Otherwise the search results could show admin only columns from the student view
+df_unsorted_student = courses_df[student_courses]
 df = df_unsorted_student.sort_values(by='School District') # sorting alphabetically for student view
 student_string = df.to_json(orient='records')
 data_list = []
