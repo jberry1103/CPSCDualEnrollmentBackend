@@ -56,13 +56,14 @@ metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+
 # Example: fetch data
 result = session.execute(text("SELECT * FROM articulations"))
 
 
 courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
 #courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
-courses_df_unsorted = pd.read_csv("output_data/output_course_data.csv")
+# courses_df_unsorted = pd.read_csv("output_data/output_course_data.csv")
 courses_df = courses_df_unsorted.sort_values(by="Career Cluster") # sorting alphabetically for admin view
 courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1) # Hidden Columns
 current_subset_df = courses_df
@@ -436,15 +437,13 @@ def upload_file():
         filename = file.filename
         filepath = os.path.join("output_data", filename)
         file.save(filepath)
-        df = pd.read_csv(filepath)
-        return jsonify({ 'filename': filepath}), 200
-        # try:
-        #     df = pd.read_csv(filepath)
-        #     df.to_sql('articulations', con=engine, if_exists='append', index=False)
-        # except Exception as e:
-        #     return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
+        try:
+            df = pd.read_csv(filepath)
+            df.to_sql('articulations', con=engine, if_exists='append', index=False)
+        except Exception as e:
+            return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
 
-        # return jsonify({'message': 'File uploaded and data saved successfully', 'filename': filename}), 200
+        return jsonify({'message': 'File uploaded and data saved successfully', 'filename': filename}), 200
 
 # Running app
 if __name__ == '__main__':
