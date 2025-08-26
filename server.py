@@ -463,6 +463,8 @@ def student_alphabetical_filter():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    global courses_df, course_embeddings, index, general_indices, student_string
+
     if 'file' not in request.files:
         return jsonify({'error': 'No file part in the request'}), 400
 
@@ -473,13 +475,46 @@ def upload_file():
     if file:
         filename = file.filename
         filepath = os.path.join("output_data", filename)
+        
         if os.path.exists(filepath):
             os.remove(filepath)
+        
         file.save(filepath)
+
         try:
+            # Load new data
             df = pd.read_csv(filepath)
             df = renamingColumnNames(df)
+
+            # Replace data in SQL database
             df.to_sql('articulations', con=engine, if_exists='replace', index=False)
+
+            # ✅ Step 1: Reload from SQL database
+            result = session.execute(text("SELECT * FROM articulations"))
+            courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
+            courses_df_unsorted = renamingColumnNames(courses_df_unsorted)
+            courses_df = courses_df_unsorted.sort_values(by="Career Cluster")
+
+            # ✅ Step 2: Clean columns (admin view)
+            courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1)
+
+            # ✅ Step 3: Create new student view
+            df_student = courses_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 
+                                     'HS Course Description', 'College', 'College Course', 'College Course Name', 
+                                     'College Credits', 'Applicable College Program', 'Type of Credit', 'Academic Years']]
+            student_string = df_student.sort_values(by='School District').to_json(orient='records')
+
+            # ✅ Step 4: Rebuild embeddings
+            course_embeddings = model.encode(courses_df["HS Course Description"].tolist(), convert_to_numpy=True).astype('float32')
+
+            # ✅ Step 5: Rebuild FAISS index
+            d = course_embeddings.shape[1]
+            index = faiss.IndexFlatL2(d)
+            index.add(course_embeddings)
+
+            # ✅ Step 6: Rebuild general search index
+            general_indices = build_general_indices(courses_df, model)
+
         except Exception as e:
             return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
 
