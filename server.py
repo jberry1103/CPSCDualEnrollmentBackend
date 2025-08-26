@@ -471,8 +471,10 @@ def upload_file():
         return jsonify({'error': 'No selected file'}), 400
 
     if file:
-        filename = file.filename
         filepath = os.path.join("output_data", filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        filename = file.filename
         file.save(filepath)
         try:
             df = pd.read_csv(filepath)
