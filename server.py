@@ -57,6 +57,28 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 df = pd.read_csv("output_data\output_course_data.csv")
+df.rename(columns={
+    'Career Cluster': 'career_cluster',
+    'School District': 'school_district',
+    'High School': 'high_school',
+    'HS Course Name': 'hs_course_name',
+    'HS Course Credits': 'hs_course_credits',
+    'HS Course Description': 'hs_course_description',
+    'Type of Credit': 'type_of_credit',
+    'HS Course CIP Code': 'hs_course_cip_code',
+    'College': 'college',
+    'College Course': 'college_course',
+    'College Course Name': 'college_course_name',
+    'College Credits': 'college_credits',
+    'College Course Description': 'college_course_description',
+    'Applicable College Program': 'applicable_college_program',
+    'College Course CIP Code': 'college_course_cip_code',
+    'Academic Years': 'academic_years',
+    'Status of Articulation': 'status_of_articulation',
+    'Articulation': 'articulation',
+    'High School Teacher Name': 'high_school_teacher_name',
+    'Consortium Name': 'consortium_name',
+}, inplace=True)
 df.to_sql('articulations', con=engine, if_exists='append', index=False)
 
 # Example: fetch data
