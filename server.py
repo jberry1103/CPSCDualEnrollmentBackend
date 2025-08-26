@@ -56,7 +56,7 @@ metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-df = pd.read_csv("output_data\output_course_data.csv")
+df = pd.read_csv("output_data/output_course_data.csv")
 df.rename(columns={
     'Career Cluster': 'career_cluster',
     'School District': 'school_district',
