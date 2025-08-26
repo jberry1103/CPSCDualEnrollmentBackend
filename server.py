@@ -476,7 +476,8 @@ def upload_file():
         file.save(filepath)
         try:
             df = pd.read_csv(filepath)
-            df.to_sql('articulations', con=engine, if_exists='append', index=False)
+            df = renamingColumnNames(df)
+            df.to_sql('articulations', con=engine, if_exists='replace', index=False)
         except Exception as e:
             return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
 
