@@ -436,6 +436,7 @@ def upload_file():
         filename = file.filename
         filepath = os.path.join("output_data", filename)
         file.save(filepath)
+        df = pd.read_csv(filepath)
         return jsonify({ 'filename': filepath}), 200
         # try:
         #     df = pd.read_csv(filepath)
