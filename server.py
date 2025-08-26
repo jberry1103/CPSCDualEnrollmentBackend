@@ -56,14 +56,14 @@ metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+df = pd.read_csv("output_data\output_course_data.csv")
+df.to_sql('articulations', con=engine, if_exists='append', index=False)
 
 # Example: fetch data
 result = session.execute(text("SELECT * FROM articulations"))
 
 
 courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
-#courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
-# courses_df_unsorted = pd.read_csv("output_data/output_course_data.csv")
 courses_df = courses_df_unsorted.sort_values(by="Career Cluster") # sorting alphabetically for admin view
 courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1) # Hidden Columns
 current_subset_df = courses_df
