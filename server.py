@@ -94,7 +94,7 @@ session = Session()
 df = pd.read_csv("output_data/output_course_data.csv")
 df = renamingColumnNames(df)
 
-df.to_sql('articulations', con=engine, if_exists='append', index=False)
+df.to_sql('articulations', con=engine, if_exists='replace', index=False)
 
 # Example: fetch data
 result = session.execute(text("SELECT * FROM articulations"))
