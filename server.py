@@ -21,6 +21,41 @@ from werkzeug.utils import secure_filename
 UPLOAD_FOLDER = os.path.join('output_data')
 ALLOWED_EXTENSIONS = {'csv'}
 
+def renamingColumnNames(df): 
+    rename_map = {
+    'Career Cluster': 'career_cluster',
+    'School District': 'school_district',
+    'High School': 'high_school',
+    'HS Course Name': 'hs_course_name',
+    'HS Course Credits': 'hs_course_credits',
+    'HS Course Description': 'hs_course_description',
+    'Type of Credit': 'type_of_credit',
+    'HS Course CIP Code': 'hs_course_cip_code',
+    'College': 'college',
+    'College Course': 'college_course',
+    'College Course Name': 'college_course_name',
+    'College Credits': 'college_credits',
+    'College Course Description': 'college_course_description',
+    'Applicable College Program': 'applicable_college_program',
+    'College Course CIP Code': 'college_course_cip_code',
+    'Academic Years': 'academic_years',
+    'Status of Articulation': 'status_of_articulation',
+    'Articulation': 'articulation',
+    'High School Teacher Name': 'high_school_teacher_name',
+    'Consortium Name': 'consortium_name',
+    }
+    # Create reverse mapping (snake_case -> original)
+    reverse_map = {v: k for k, v in rename_map.items()}
+
+    # Toggle between original and snake_case
+    if any(col in df.columns for col in rename_map):
+        # If original columns are present, convert to snake_case
+        df.rename(columns=rename_map, inplace=True)
+    elif any(col in df.columns for col in reverse_map):
+        # If snake_case columns are present, convert back to original
+        df.rename(columns=reverse_map, inplace=True)
+    return df
+
 # Define your database URL — change this to your actual DB
 engine = create_engine('sqlite:///nwesd.db') 
 metadata = MetaData()
@@ -57,35 +92,15 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 df = pd.read_csv("output_data/output_course_data.csv")
-df.rename(columns={
-    'Career Cluster': 'career_cluster',
-    'School District': 'school_district',
-    'High School': 'high_school',
-    'HS Course Name': 'hs_course_name',
-    'HS Course Credits': 'hs_course_credits',
-    'HS Course Description': 'hs_course_description',
-    'Type of Credit': 'type_of_credit',
-    'HS Course CIP Code': 'hs_course_cip_code',
-    'College': 'college',
-    'College Course': 'college_course',
-    'College Course Name': 'college_course_name',
-    'College Credits': 'college_credits',
-    'College Course Description': 'college_course_description',
-    'Applicable College Program': 'applicable_college_program',
-    'College Course CIP Code': 'college_course_cip_code',
-    'Academic Years': 'academic_years',
-    'Status of Articulation': 'status_of_articulation',
-    'Articulation': 'articulation',
-    'High School Teacher Name': 'high_school_teacher_name',
-    'Consortium Name': 'consortium_name',
-}, inplace=True)
+df = renamingColumnNames(df)
+
 df.to_sql('articulations', con=engine, if_exists='append', index=False)
 
 # Example: fetch data
 result = session.execute(text("SELECT * FROM articulations"))
 
-
 courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
+courses_df_unsorted = renamingColumnNames(courses_df_unsorted)
 courses_df = courses_df_unsorted.sort_values(by="Career Cluster") # sorting alphabetically for admin view
 courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1) # Hidden Columns
 current_subset_df = courses_df
