@@ -463,7 +463,7 @@ def student_alphabetical_filter():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    global courses_df, course_embeddings, index, general_indices, student_string, courses_string
+    global courses_df, course_embeddings, index, general_indices, student_string, json_string
 
     if 'file' not in request.files:
         return jsonify({'error': 'No file part in the request'}), 400
@@ -495,7 +495,7 @@ def upload_file():
             courses_df = courses_df_unsorted.sort_values(by="Career Cluster")
 
             courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1)
-            courses_string = courses_df.sort_values(by='School District').to_json(orient='records')
+            json_string = courses_df.sort_values(by='School District').to_json(orient='records')
 
             df_student = courses_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 
                                      'HS Course Description', 'College', 'College Course', 'College Course Name', 
