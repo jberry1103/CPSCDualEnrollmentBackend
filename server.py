@@ -106,10 +106,10 @@ courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Conso
 current_subset_df = courses_df
 
 json_string = courses_df.to_json(orient='records')
-# adjust this to change what columns are visible in student view
-student_courses = ['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
-                  'College Course', 'College Course Name', 'College Credits', 'Applicable College Program', 'Type of Credit', 'Academic Years']
-df_unsorted_student = courses_df[student_courses]
+df_unsorted_student = courses_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
+                  'College Course', 'College Course Name', 'College Credits', 'Applicable College Program', 'Type of Credit', 'Academic Years']] # adjust this to change what columns are visible in student view
+# NOTE any changes made to the student view columns here needs to be reflected in the student view search results
+# Otherwise the search results could show admin only columns from the student view
 df = df_unsorted_student.sort_values(by='School District') # sorting alphabetically for student view
 student_string = df.to_json(orient='records')
 data_list = []
@@ -288,7 +288,8 @@ def get_student_search():
         )
         current_subset_df = results
     
-    current_subset_df = current_subset_df[student_courses]
+    current_subset_df = current_subset_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
+                  'College Course', 'College Course Name', 'College Credits', 'Type of Credit', 'Academic Years']]
     json_string = current_subset_df.to_json(orient='records')
     return json_string
 
@@ -372,7 +373,8 @@ def get_student_filter():
     
 
     # Convert the filtered DataFrame to JSON
-    current_subset_df = current_subset_df[student_courses]
+    current_subset_df = current_subset_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
+                  'College Course', 'College Course Name', 'College Credits', 'Type of Credit', 'Academic Years']]
     
     json_result = current_subset_df.to_json(orient='records')
 
@@ -490,7 +492,7 @@ def upload_file():
             result = session.execute(text("SELECT * FROM articulations"))
             courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
             courses_df_unsorted = renamingColumnNames(courses_df_unsorted)
-            courses_df = courses_df_unsorted.sort_values(by="Career Cluster")
+            courses_df = courses_df_unsorted.sort_values(by="Career Cluster").to_json(orient='records')
 
             courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1)
 
