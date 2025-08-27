@@ -463,7 +463,7 @@ def student_alphabetical_filter():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    global courses_df, course_embeddings, index, general_indices, student_string
+    global courses_df, course_embeddings, index, general_indices, student_string, courses_string
 
     if 'file' not in request.files:
         return jsonify({'error': 'No file part in the request'}), 400
