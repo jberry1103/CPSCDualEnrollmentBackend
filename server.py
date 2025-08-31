@@ -176,8 +176,13 @@ def get_time():
     
 @app.route('/table')
 def get_data():
-#    return data
-    return json_string
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT * FROM articulations"))
+        df = pd.DataFrame(result.fetchall(), columns=result.keys())
+        df = renamingColumnNames(df)
+        df = df.sort_values(by="Career Cluster")
+        df = df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1)
+        return df.to_json(orient='records')
     
 @app.route('/search', methods=['POST'])
 def get_search():
@@ -193,47 +198,52 @@ def get_search():
     status_filter = filters.get("status", "").strip()
     admin_alphabetical_filter = filters.get("adminalphabetical", "").strip()
     
-    # Start with the full DataFrame
-    current_subset_df = courses_df
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT * FROM articulations"))
+        df = pd.DataFrame(result.fetchall(), columns=result.keys())
+        df = renamingColumnNames(df)
+        current_subset_df = df.sort_values(by="Career Cluster")
+        
    
-    # Apply filters conditionally
-    if highschool_filter:
-        current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
+        # Apply filters conditionally
+        if highschool_filter:
+            current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
    
-    if college_filter:
-        current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+        if college_filter:
+            current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
 
-    if school_district_filter:
-        current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
+        if school_district_filter:
+            current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
 
-    if career_cluster_filter:
-        current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
+        if career_cluster_filter:
+            current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
     
-    if academic_year_filter:
-        current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == academic_year_filter.lower()]
+        if academic_year_filter:
+            current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == academic_year_filter.lower()]
     
-    if status_filter:
-        current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
+        if status_filter:
+            current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
     
-    if admin_alphabetical_filter:
-        current_subset_df = current_subset_df.sort_values(by=admin_alphabetical_filter)
+        if admin_alphabetical_filter:
+            current_subset_df = current_subset_df.sort_values(by=admin_alphabetical_filter)
+        
+        current_subset_df = current_subset_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1)
+        json_string = current_subset_df.to_json(orient='records')
 
-    json_string = current_subset_df.to_json(orient='records')
-
-    if len(search_input) != 0:
-        results = general_search(
-            query=search_input,
-            df=courses_df,
-            model=model,
-            indices=general_indices,
-            top_k_per_col=30,   # tweak if you want faster/slower OR if dataset is smaller than 30
-            min_results=10,     # guarantee at least 10 results
-            rel_threshold=0.60, # keep everything over 60% match
-            max_results=None # can cap results if needed
-        )
-        json_string = results.to_json(orient='records')
+        if len(search_input) != 0:
+            results = general_search(
+                query=search_input,
+                df=current_subset_df,
+                model=model,
+                indices=general_indices,
+                top_k_per_col=30,   # tweak if you want faster/slower OR if dataset is smaller than 30
+                min_results=10,     # guarantee at least 10 results
+                rel_threshold=0.60, # keep everything over 60% match
+                max_results=None # can cap results if needed
+            )
+            json_string = results.to_json(orient='records')
     
-    return json_string
+        return json_string
 
 
 @app.route('/studentSearch', methods=['POST'])
@@ -251,50 +261,53 @@ def get_student_search():
     student_alphabetical_filter = filters.get("studentalphabetical", "").strip()
     
     # Start with the full DataFrame
-    current_subset_df = courses_df
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT * FROM articulations"))
+        df = pd.DataFrame(result.fetchall(), columns=result.keys())
+        df = renamingColumnNames(df)
+        current_subset_df = df.sort_values(by='School District')
+        # Apply filters conditionally
+        if highschool_filter:
+            current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
    
-    # Apply filters conditionally
-    if highschool_filter:
-        current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
-   
-    if college_filter:
-        current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+        if college_filter:
+            current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
 
-    if school_district_filter:
-        current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
+        if school_district_filter:
+            current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
 
-    if career_cluster_filter:
-        current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
+        if career_cluster_filter:
+            current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
 
-    if academic_year_filter:
-        current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == academic_year_filter.lower()]
+        if academic_year_filter:
+            current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == academic_year_filter.lower()]
     
-    if status_filter:
-        current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
+        if status_filter:
+            current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
     
-    if student_alphabetical_filter:
-        current_subset_df = current_subset_df.sort_values(by=student_alphabetical_filter)
+        if student_alphabetical_filter:
+            current_subset_df = current_subset_df.sort_values(by=student_alphabetical_filter)
 
         
 
-    # json_string = current_subset_df.to_json(orient='records')
-    if len(search_input) != 0:
-        results = general_search(
-            query=search_input,
-            df=courses_df,
-            model=model,
-            indices=general_indices,
-            top_k_per_col=30,   # tweak if you want faster/slower OR if dataset smaller than 30
-            min_results=10,     # guarantee at least 10 results
-            rel_threshold=0.60, # keep everything over 60% match
-            max_results=None # can cap results if needed
-        )
-        current_subset_df = results
+        # json_string = current_subset_df.to_json(orient='records')
+        if len(search_input) != 0:
+            results = general_search(
+                query=search_input,
+                df=current_subset_df,
+                model=model,
+                indices=general_indices,
+                top_k_per_col=30,   # tweak if you want faster/slower OR if dataset smaller than 30
+                min_results=10,     # guarantee at least 10 results
+                rel_threshold=0.60, # keep everything over 60% match
+                max_results=None # can cap results if needed
+            )
+            current_subset_df = results
     
-    current_subset_df = current_subset_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
+        current_subset_df = current_subset_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
                   'College Course', 'College Course Name', 'College Credits', 'Type of Credit', 'Academic Years']]
-    json_string = current_subset_df.to_json(orient='records')
-    return json_string
+        json_string = current_subset_df.to_json(orient='records')
+        return json_string
 
 @app.route('/filter', methods=['POST'])
 def get_filter():
@@ -306,37 +319,40 @@ def get_filter():
     academic_year_filter = filters.get("academicyear", "").strip()
     status_filter = filters.get("status", "").strip()
     admin_alphabetical_filter = filters.get("adminalphabetical", "").strip()
-    print(admin_alphabetical_filter)
 
     # Start with the full DataFrame
-    current_subset_df = courses_df
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT * FROM articulations"))
+        df = pd.DataFrame(result.fetchall(), columns=result.keys())
+        df = renamingColumnNames(df)
+        current_subset_df = df.sort_values(by="Career Cluster")
    
-    # Apply filters conditionally
-    if highschool_filter:
-        current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
+        # Apply filters conditionally
+        if highschool_filter:
+            current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
    
-    if college_filter:
-        current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+        if college_filter:
+            current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
 
-    if school_district_filter:
-        current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
+        if school_district_filter:
+            current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
 
-    if career_cluster_filter:
-        current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
+        if career_cluster_filter:
+            current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
 
-    if academic_year_filter:
-        current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == academic_year_filter.lower()]
+        if academic_year_filter:
+            current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == academic_year_filter.lower()]
 
-    if status_filter:
-        current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
+        if status_filter:
+            current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
     
-    if admin_alphabetical_filter:
-        current_subset_df = current_subset_df.sort_values(by=admin_alphabetical_filter)
+        if admin_alphabetical_filter:
+            current_subset_df = current_subset_df.sort_values(by=admin_alphabetical_filter)
 
-    # Convert the filtered DataFrame to JSON
-    json_result = current_subset_df.to_json(orient='records')
+        # Convert the filtered DataFrame to JSON
+        json_result = current_subset_df.to_json(orient='records')
 
-    return json_result
+        return json_result
 
 @app.route('/studentfilter', methods=['POST'])
 def get_student_filter():
@@ -348,40 +364,43 @@ def get_student_filter():
     academic_year_filter = filters.get("academicyear", "").strip()
     status_filter = filters.get("status", "").strip()
     student_alphabetical_filter = filters.get("studentalphabetical", "").strip()
-
     # Start with the full DataFrame
-    current_subset_df = courses_df
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT * FROM articulations"))
+        df = pd.DataFrame(result.fetchall(), columns=result.keys())
+        df = renamingColumnNames(df)
+        current_subset_df = df.sort_values(by='School District')
    
-    # Apply filters conditionally
-    if highschool_filter:
-        current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
+        # Apply filters conditionally
+        if highschool_filter:
+            current_subset_df = current_subset_df[current_subset_df["High School"].str.lower() == highschool_filter.lower()]
    
-    if college_filter:
-        current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
+        if college_filter:
+            current_subset_df = current_subset_df[current_subset_df["College"].str.lower() == college_filter.lower()]
 
-    if school_district_filter:
-        current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
+        if school_district_filter:
+            current_subset_df = current_subset_df[current_subset_df["School District"].str.lower() == school_district_filter.lower()]
 
-    if career_cluster_filter:
-        current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
+        if career_cluster_filter:
+            current_subset_df = current_subset_df[current_subset_df["Career Cluster"].str.lower() == career_cluster_filter.lower()]
     
-    if academic_year_filter:
-        current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == academic_year_filter.lower()]
+        if academic_year_filter:
+            current_subset_df = current_subset_df[current_subset_df["Academic Years"].str.lower() == academic_year_filter.lower()]
     
-    if status_filter:
-        current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
+        if status_filter:
+            current_subset_df = current_subset_df[current_subset_df["Status of Articulation"].str.lower() == status_filter.lower()]
     
-    if student_alphabetical_filter:
-        current_subset_df = current_subset_df.sort_values(by=student_alphabetical_filter)
+        if student_alphabetical_filter:
+            current_subset_df = current_subset_df.sort_values(by=student_alphabetical_filter)
     
 
-    # Convert the filtered DataFrame to JSON
-    current_subset_df = current_subset_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
-                  'College Course', 'College Course Name', 'College Credits', 'Type of Credit', 'Academic Years']]
+        # Convert the filtered DataFrame to JSON
+        current_subset_df = current_subset_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 'HS Course Description', 'College',
+                            'College Course', 'College Course Name', 'College Credits', 'Type of Credit', 'Academic Years']]
     
-    json_result = current_subset_df.to_json(orient='records')
+        json_result = current_subset_df.to_json(orient='records')
 
-    return json_result
+        return json_result
 
 @app.route('/')
 def home():
@@ -389,68 +408,57 @@ def home():
 
 @app.route('/student')
 def student_view():
-    return student_string
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT * FROM articulations"))
+        df = pd.DataFrame(result.fetchall(), columns=result.keys())
+        df = renamingColumnNames(df)
+        df = df[['School District', 'High School', 'HS Course Name', 'HS Course Credits',
+                 'HS Course Description', 'College', 'College Course', 'College Course Name',
+                 'College Credits', 'Applicable College Program', 'Type of Credit', 'Academic Years']]
+        df = df.sort_values(by='School District')
+        return df.to_json(orient='records')
 
 @app.route('/highschoolFilter')
 def highschool_filter():
-    unique_highschools =[]
-
-    for x in courses_df["High School"]: 
-        if x not in unique_highschools: 
-            unique_highschools.append(x)
-    sorted_unique_highschools = sorted(unique_highschools) #Alphabetizes filter
-    return sorted_unique_highschools
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT DISTINCT high_school FROM articulations"))
+        values = [row[0] for row in result if row[0]]
+        return sorted(values)
 
 @app.route('/collegeFilter')
 def college_filter():
-    #Checks for the unique values all with that name
-    unique_colleges =[]
-
-    for x in courses_df["College"]: 
-        if x not in unique_colleges: 
-            unique_colleges.append(x)
-    sorted_unique_colleges = sorted(unique_colleges)
-    return sorted_unique_colleges
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT DISTINCT college FROM articulations"))
+        values = [row[0] for row in result if row[0]]
+        return sorted(values)
 
 @app.route('/schooldistrictFilter')
 def school_district_filter():
-    unique_school_districts =[]
-
-    for x in courses_df["School District"]: 
-        if x not in unique_school_districts: 
-            unique_school_districts.append(x)
-    sorted_unique_school_districts = sorted(unique_school_districts)
-    return sorted_unique_school_districts
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT DISTINCT school_district FROM articulations"))
+        values = [row[0] for row in result if row[0]]
+        return sorted(values)
 
 @app.route('/careerclusterFilter')
 def career_cluster_filter():
-    unique_career_cluster =[]
-
-    for x in courses_df["Career Cluster"]: 
-        if x not in unique_career_cluster: 
-            unique_career_cluster.append(x)
-    sorted_unique_career_cluster = sorted(unique_career_cluster)
-    return sorted_unique_career_cluster
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT DISTINCT career_cluster] FROM articulations"))
+        values = [row[0] for row in result if row[0]]
+        return sorted(values)
 
 @app.route('/academicyearFilter')
 def academic_year_filter():
-    unique_academic_years =[]
-
-    for x in courses_df["Academic Years"]: 
-        if x not in unique_academic_years: 
-            unique_academic_years.append(x)
-    sorted_unique_academic_years = sorted(unique_academic_years)
-    return sorted_unique_academic_years
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT DISTINCT academic_years FROM articulations"))
+        values = [row[0] for row in result if row[0]]
+        return sorted(values)
 
 @app.route('/statusFilter')
 def status_filter():
-    unique_status =[]
-
-    for x in courses_df["Status of Articulation"]: 
-        if x not in unique_status: 
-            unique_status.append(x)
-    sorted_unique_status = sorted(unique_status)
-    return sorted_unique_status
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT DISTINCT status_of_articulation FROM articulations"))
+        values = [row[0] for row in result if row[0]]
+        return sorted(values)
 
 @app.route('/adminalphabeticalFilter')
 def admin_alphabetical_filter():
