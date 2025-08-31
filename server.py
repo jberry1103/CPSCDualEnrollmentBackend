@@ -152,26 +152,30 @@ def get_time():
     #  Search for the most similar courses
     distances, indices = index.search(input_embedding, k=10)  
     # Get the top matching courses
-    similar_courses = courses_df.iloc[indices[0]].copy()
-    similar_courses["Similarity_Score"] = 1 / (1 + distances[0])  # Convert distance to similarity score (higher is better)
-    similar_course_names = similar_courses["College Course Name"]
-    similar_course_descriptions = similar_courses["College Course Description"]
-    similar_course_colleges = similar_courses["College"]
-    similar_course_numbers = similar_courses["College Course"]
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT * FROM articulations"))
+        df = pd.DataFrame(result.fetchall(), columns=result.keys())
+        courses_df = renamingColumnNames(df)
+        similar_courses = courses_df.iloc[indices[0]].copy()
+        similar_courses["Similarity_Score"] = 1 / (1 + distances[0])  # Convert distance to similarity score (higher is better)
+        similar_course_names = similar_courses["College Course Name"]
+        similar_course_descriptions = similar_courses["College Course Description"]
+        similar_course_colleges = similar_courses["College"]
+        similar_course_numbers = similar_courses["College Course"]
     
-    return { # Three most similar courses for AI Similarity Search
-      'name1': similar_course_names.iloc[0],
-      'description1': similar_course_descriptions.iloc[0],
-      'college_course1': similar_course_colleges.iloc[0],
-      'course_number1': similar_course_numbers.iloc[0],
-      'name2': similar_course_names.iloc[1],
-      'description2': similar_course_descriptions.iloc[1],
-      'college_course2': similar_course_colleges.iloc[1],
-       'course_number2': similar_course_numbers.iloc[1],
-      'name3':similar_course_names.iloc[2],
-      'description3': similar_course_descriptions.iloc[2],
-      'college_course3': similar_course_colleges.iloc[2],
-       'course_number3': similar_course_numbers.iloc[2],
+        return { # Three most similar courses for AI Similarity Search
+            'name1': similar_course_names.iloc[0],
+            'description1': similar_course_descriptions.iloc[0],
+            'college_course1': similar_course_colleges.iloc[0],
+            'course_number1': similar_course_numbers.iloc[0],
+            'name2': similar_course_names.iloc[1],
+            'description2': similar_course_descriptions.iloc[1],
+            'college_course2': similar_course_colleges.iloc[1],
+            'course_number2': similar_course_numbers.iloc[1],
+            'name3':similar_course_names.iloc[2],
+            'description3': similar_course_descriptions.iloc[2],
+            'college_course3': similar_course_colleges.iloc[2],
+            'course_number3': similar_course_numbers.iloc[2],
         }
     
 @app.route('/table')
@@ -442,7 +446,7 @@ def school_district_filter():
 @app.route('/careerclusterFilter')
 def career_cluster_filter():
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT DISTINCT career_cluster] FROM articulations"))
+        result = conn.execute(text("SELECT DISTINCT career_cluster FROM articulations"))
         values = [row[0] for row in result if row[0]]
         return sorted(values)
 
@@ -474,8 +478,6 @@ def student_alphabetical_filter():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    global courses_df, course_embeddings, index, general_indices, student_string, json_string
-
     if 'file' not in request.files:
         return jsonify({'error': 'No file part in the request'}), 400
 
