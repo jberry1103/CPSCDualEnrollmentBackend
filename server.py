@@ -489,7 +489,7 @@ def upload_file():
             # Load new data
             df = pd.read_csv(filepath)
             df_dict = df.to_dict(orient='records')
-            return jsonify({df_dict}), 500
+            return jsonify(df_dict), 500
         #     df = renamingColumnNames(df)
 
         #     # Replace data in SQL database
