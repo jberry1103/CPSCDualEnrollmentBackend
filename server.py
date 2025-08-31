@@ -489,12 +489,14 @@ def upload_file():
             # Load new data
             df = pd.read_csv(filepath)
             df_preview = df.head(11).to_dict(orient='records') 
-            return jsonify({'preview': df_preview}), 200
+            
         #     df = renamingColumnNames(df)
 
         #     # Replace data in SQL database
-        #     df.to_sql('articulations', con=engine, if_exists='replace', index=False)
-
+            df.to_sql('articulations', con=engine, if_exists='replace', index=False)
+            result = session.execute(text("SELECT * FROM articulations"))
+            df_preview = pd.DataFrame(result.fetchall(), columns=result.keys())
+            return jsonify({'preview': df_preview}), 200
         #     result = session.execute(text("SELECT * FROM articulations"))
         #     courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
         #     courses_df_unsorted = renamingColumnNames(courses_df_unsorted)
