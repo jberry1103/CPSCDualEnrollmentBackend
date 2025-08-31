@@ -18,8 +18,10 @@ from search_engine import build_general_indices, general_search
 from sqlalchemy import create_engine, text, MetaData, Table, Column, Float, String, Text
 from sqlalchemy.orm import sessionmaker
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import RequestEntityTooLarge
 UPLOAD_FOLDER = os.path.join('output_data')
 ALLOWED_EXTENSIONS = {'csv'}
+
 
 def renamingColumnNames(df): 
     rename_map = {
@@ -481,7 +483,8 @@ def upload_file():
             os.remove(filepath)
         
         file.save(filepath)
-
+        if not os.path.exists(filepath):
+            return jsonify({'error': 'No file'}), 400
         try:
             # Load new data
             df = pd.read_csv(filepath)
@@ -515,6 +518,10 @@ def upload_file():
             return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
 
         return jsonify({'message': 'File uploaded and data saved successfully', 'filename': filename}), 200
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_large_file(e):
+    return jsonify({'error': 'File is too large. Max upload size is 16MB.'}), 413
 
 # Running app
 if __name__ == '__main__':
