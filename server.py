@@ -489,42 +489,36 @@ def upload_file():
             # Load new data
             df = pd.read_csv(filepath)
             if os.path.exists(filepath):
-                os.remove(filepath)
-            df_preview = df.head(11).to_dict(orient='records') 
-            
-        #     df = renamingColumnNames(df)
+                os.remove(filepath)            
+            df = renamingColumnNames(df)
 
-        #     # Replace data in SQL database
+            # Replace data in SQL database
             df.to_sql('articulations', con=engine, if_exists='replace', index=False)
             result = session.execute(text("SELECT * FROM articulations"))
-            df = pd.DataFrame(result.fetchall(), columns=result.keys())
-            df_preview = df.head(11).to_dict(orient='records') 
-            return jsonify({'preview': df_preview}), 200
-        #     result = session.execute(text("SELECT * FROM articulations"))
-        #     courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
-        #     courses_df_unsorted = renamingColumnNames(courses_df_unsorted)
-        #     courses_df = courses_df_unsorted.sort_values(by="Career Cluster")
+            courses_df_unsorted = pd.DataFrame(result.fetchall(), columns=result.keys())
+            courses_df_unsorted = renamingColumnNames(courses_df_unsorted)
+            courses_df = courses_df_unsorted.sort_values(by="Career Cluster")
 
-        #     courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1)
-        #     json_string = courses_df.sort_values(by='School District').to_json(orient='records')
+            courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1)
+            json_string = courses_df.sort_values(by='School District').to_json(orient='records')
 
-        #     df_student = courses_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 
-        #                              'HS Course Description', 'College', 'College Course', 'College Course Name', 
-        #                              'College Credits', 'Applicable College Program', 'Type of Credit', 'Academic Years']]
-        #     student_string = df_student.sort_values(by='School District').to_json(orient='records')
+            df_student = courses_df[['School District', 'High School', 'HS Course Name', 'HS Course Credits', 
+                                     'HS Course Description', 'College', 'College Course', 'College Course Name', 
+                                     'College Credits', 'Applicable College Program', 'Type of Credit', 'Academic Years']]
+            student_string = df_student.sort_values(by='School District').to_json(orient='records')
 
-        #     course_embeddings = model.encode(courses_df["HS Course Description"].tolist(), convert_to_numpy=True).astype('float32')
+            course_embeddings = model.encode(courses_df["HS Course Description"].tolist(), convert_to_numpy=True).astype('float32')
 
-        #     d = course_embeddings.shape[1]
-        #     index = faiss.IndexFlatL2(d)
-        #     index.add(course_embeddings)
+            d = course_embeddings.shape[1]
+            index = faiss.IndexFlatL2(d)
+            index.add(course_embeddings)
 
-        #     general_indices = build_general_indices(courses_df, model)
+            general_indices = build_general_indices(courses_df, model)
 
         except Exception as e:
             return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
 
-        # return jsonify({'message': 'File uploaded and data saved successfully', 'filename': filename}), 200
+        return jsonify({'message': 'File uploaded and data saved successfully', 'filename': filename}), 200
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_large_file(e):
