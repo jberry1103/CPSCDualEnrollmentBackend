@@ -484,7 +484,7 @@ def upload_file():
         courses_df = courses_df_unsorted.sort_values(by="Career Cluster")
 
         index_manager = IndexManager.get_instance()
-        index_manager.intialize(courses_df_unsorted)
+        index_manager.initialize(courses_df_unsorted)
         courses_df = courses_df.drop(['Articulation', 'High School Teacher Name', 'Consortium Name'], axis=1)
 
         return jsonify({'message': 'File uploaded and data saved successfully', 'filename': file.filename}), 200
