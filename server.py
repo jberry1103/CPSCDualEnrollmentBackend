@@ -136,7 +136,7 @@ def get_time():
     input_course_description = data["description"]
     
     index_manager = IndexManager()
-    distances, indices  = index_manager.search_similar_courses(input_course_description)
+    distances, indices  = index_manager.search_similar_course(input_course_description)
 
 
     #  Search for the most similar courses
