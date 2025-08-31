@@ -134,7 +134,7 @@ index.add(course_embeddings)  # Add all course vectors to the index
 # # Initializing flask app
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
 # Route for seeing a data
